@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { Projects } from '#/features/projects/Projects'
 
 export const Route = createFileRoute('/_app/projects/')({
-  component: () => <div className="p-8">Halaman Proyek</div>,
+  component: Projects,
 })
