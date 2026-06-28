@@ -59,6 +59,7 @@ export default function Dashboard() {
           .from("workspace_members")
           .select("workspace_id")
           .eq("user_id", user.id)
+          .limit(1)
           .maybeSingle();
 
         if (workspaceError) throw workspaceError;

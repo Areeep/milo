@@ -46,3 +46,44 @@ export const getServerSession = createServerFn({ method: "GET" }).handler(
     return { session, profile };
   },
 );
+
+export const getServerWorkspaces = createServerFn({ method: "GET" })
+  .validator((userId: string) => userId)
+  .handler(async ({ data: userId }) => {
+    const supabase = createServerClient(
+      env.SUPABASE_URL,
+      env.SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          get(name: string) {
+            return getCookie(name);
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            setCookie(name, value, options);
+          },
+          remove(name: string, options: CookieOptions) {
+            setCookie(name, "", { ...options, maxAge: 0 });
+          },
+        },
+      },
+    );
+
+    const { data: memberWorkspaces } = await supabase
+      .from("workspace_members")
+      .select(`
+        workspace_id,
+        workspaces (
+          id,
+          name,
+          avatar_url
+        )
+      `)
+      .eq("user_id", userId);
+
+    return (
+      memberWorkspaces
+        ?.map((w) => w.workspaces)
+        .flat()
+        .filter(Boolean) || []
+    );
+  });

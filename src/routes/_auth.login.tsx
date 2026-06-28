@@ -27,7 +27,7 @@ function LoginPage() {
       return;
     }
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -38,9 +38,19 @@ function LoginPage() {
       return;
     }
 
+    const { data: workspaces } = await supabase
+      .from("workspace_members")
+      .select("workspace_id")
+      .eq("user_id", authData.user.id)
+      .limit(1);
+
     await router.invalidate();
 
-    await router.navigate({ to: "/dashboard" });
+    if (workspaces && workspaces.length > 0) {
+      await router.navigate({ to: "/dashboard" });
+    } else {
+      await router.navigate({ to: "/create-workspace" });
+    }
   };
 
   return (

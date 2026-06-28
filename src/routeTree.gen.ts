@@ -14,7 +14,15 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRegisterRouteImport } from './routes/_auth.register'
 import { Route as AuthLoginRouteImport } from './routes/_auth.login'
+import { Route as AppTeamRouteImport } from './routes/_app.team'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppCreateWorkspaceRouteImport } from './routes/_app.create-workspace'
+import { Route as AppProjectsIndexRouteImport } from './routes/_app.projects.index'
+import { Route as AppProjectsProjectIdRouteImport } from './routes/_app.projects.$projectId'
+import { Route as AppProjectsProjectIdTasksRouteImport } from './routes/_app.projects.$projectId.tasks'
+import { Route as AppProjectsProjectIdSettingsRouteImport } from './routes/_app.projects.$projectId.settings'
+import { Route as AppProjectsProjectIdCalendarRouteImport } from './routes/_app.projects.$projectId.calendar'
+import { Route as AppProjectsProjectIdAnalyticsRouteImport } from './routes/_app.projects.$projectId.analytics'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -39,46 +47,146 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const AppTeamRoute = AppTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCreateWorkspaceRoute = AppCreateWorkspaceRouteImport.update({
+  id: '/create-workspace',
+  path: '/create-workspace',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjectsIndexRoute = AppProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjectsProjectIdRoute = AppProjectsProjectIdRouteImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjectsProjectIdTasksRoute =
+  AppProjectsProjectIdTasksRouteImport.update({
+    id: '/tasks',
+    path: '/tasks',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
+const AppProjectsProjectIdSettingsRoute =
+  AppProjectsProjectIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
+const AppProjectsProjectIdCalendarRoute =
+  AppProjectsProjectIdCalendarRouteImport.update({
+    id: '/calendar',
+    path: '/calendar',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
+const AppProjectsProjectIdAnalyticsRoute =
+  AppProjectsProjectIdAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/create-workspace': typeof AppCreateWorkspaceRoute
   '/dashboard': typeof AppDashboardRoute
+  '/team': typeof AppTeamRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
+  '/projects/': typeof AppProjectsIndexRoute
+  '/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
+  '/projects/$projectId/calendar': typeof AppProjectsProjectIdCalendarRoute
+  '/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
+  '/projects/$projectId/tasks': typeof AppProjectsProjectIdTasksRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/create-workspace': typeof AppCreateWorkspaceRoute
   '/dashboard': typeof AppDashboardRoute
+  '/team': typeof AppTeamRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
+  '/projects': typeof AppProjectsIndexRoute
+  '/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
+  '/projects/$projectId/calendar': typeof AppProjectsProjectIdCalendarRoute
+  '/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
+  '/projects/$projectId/tasks': typeof AppProjectsProjectIdTasksRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
+  '/_app/create-workspace': typeof AppCreateWorkspaceRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/team': typeof AppTeamRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
+  '/_app/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
+  '/_app/projects/': typeof AppProjectsIndexRoute
+  '/_app/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
+  '/_app/projects/$projectId/calendar': typeof AppProjectsProjectIdCalendarRoute
+  '/_app/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
+  '/_app/projects/$projectId/tasks': typeof AppProjectsProjectIdTasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/create-workspace'
+    | '/dashboard'
+    | '/team'
+    | '/login'
+    | '/register'
+    | '/projects/$projectId'
+    | '/projects/'
+    | '/projects/$projectId/analytics'
+    | '/projects/$projectId/calendar'
+    | '/projects/$projectId/settings'
+    | '/projects/$projectId/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/register'
+  to:
+    | '/'
+    | '/create-workspace'
+    | '/dashboard'
+    | '/team'
+    | '/login'
+    | '/register'
+    | '/projects/$projectId'
+    | '/projects'
+    | '/projects/$projectId/analytics'
+    | '/projects/$projectId/calendar'
+    | '/projects/$projectId/settings'
+    | '/projects/$projectId/tasks'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_auth'
+    | '/_app/create-workspace'
     | '/_app/dashboard'
+    | '/_app/team'
     | '/_auth/login'
     | '/_auth/register'
+    | '/_app/projects/$projectId'
+    | '/_app/projects/'
+    | '/_app/projects/$projectId/analytics'
+    | '/_app/projects/$projectId/calendar'
+    | '/_app/projects/$projectId/settings'
+    | '/_app/projects/$projectId/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -124,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_app/team': {
+      id: '/_app/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AppTeamRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -131,15 +246,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/create-workspace': {
+      id: '/_app/create-workspace'
+      path: '/create-workspace'
+      fullPath: '/create-workspace'
+      preLoaderRoute: typeof AppCreateWorkspaceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projects/': {
+      id: '/_app/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof AppProjectsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projects/$projectId': {
+      id: '/_app/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof AppProjectsProjectIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projects/$projectId/tasks': {
+      id: '/_app/projects/$projectId/tasks'
+      path: '/tasks'
+      fullPath: '/projects/$projectId/tasks'
+      preLoaderRoute: typeof AppProjectsProjectIdTasksRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
+    '/_app/projects/$projectId/settings': {
+      id: '/_app/projects/$projectId/settings'
+      path: '/settings'
+      fullPath: '/projects/$projectId/settings'
+      preLoaderRoute: typeof AppProjectsProjectIdSettingsRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
+    '/_app/projects/$projectId/calendar': {
+      id: '/_app/projects/$projectId/calendar'
+      path: '/calendar'
+      fullPath: '/projects/$projectId/calendar'
+      preLoaderRoute: typeof AppProjectsProjectIdCalendarRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
+    '/_app/projects/$projectId/analytics': {
+      id: '/_app/projects/$projectId/analytics'
+      path: '/analytics'
+      fullPath: '/projects/$projectId/analytics'
+      preLoaderRoute: typeof AppProjectsProjectIdAnalyticsRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
   }
 }
 
+interface AppProjectsProjectIdRouteChildren {
+  AppProjectsProjectIdAnalyticsRoute: typeof AppProjectsProjectIdAnalyticsRoute
+  AppProjectsProjectIdCalendarRoute: typeof AppProjectsProjectIdCalendarRoute
+  AppProjectsProjectIdSettingsRoute: typeof AppProjectsProjectIdSettingsRoute
+  AppProjectsProjectIdTasksRoute: typeof AppProjectsProjectIdTasksRoute
+}
+
+const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
+  AppProjectsProjectIdAnalyticsRoute: AppProjectsProjectIdAnalyticsRoute,
+  AppProjectsProjectIdCalendarRoute: AppProjectsProjectIdCalendarRoute,
+  AppProjectsProjectIdSettingsRoute: AppProjectsProjectIdSettingsRoute,
+  AppProjectsProjectIdTasksRoute: AppProjectsProjectIdTasksRoute,
+}
+
+const AppProjectsProjectIdRouteWithChildren =
+  AppProjectsProjectIdRoute._addFileChildren(AppProjectsProjectIdRouteChildren)
+
 interface AppRouteChildren {
+  AppCreateWorkspaceRoute: typeof AppCreateWorkspaceRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppTeamRoute: typeof AppTeamRoute
+  AppProjectsProjectIdRoute: typeof AppProjectsProjectIdRouteWithChildren
+  AppProjectsIndexRoute: typeof AppProjectsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCreateWorkspaceRoute: AppCreateWorkspaceRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppTeamRoute: AppTeamRoute,
+  AppProjectsProjectIdRoute: AppProjectsProjectIdRouteWithChildren,
+  AppProjectsIndexRoute: AppProjectsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
