@@ -91,7 +91,6 @@ export function Sidebar({ workspaces, isOpen = false, setIsOpen }: SidebarProps)
     }));
   };
 
-  if (!activeWorkspace) return null;
 
   return (
     <>
@@ -116,7 +115,7 @@ export function Sidebar({ workspaces, isOpen = false, setIsOpen }: SidebarProps)
         >
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
-              {activeWorkspace.avatar_url ? (
+              {activeWorkspace?.avatar_url ? (
                 <img
                   src={activeWorkspace.avatar_url}
                   alt={activeWorkspace.name}
@@ -128,10 +127,10 @@ export function Sidebar({ workspaces, isOpen = false, setIsOpen }: SidebarProps)
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="truncate text-sm font-semibold text-slate-900">
-                {activeWorkspace.name}
+                {activeWorkspace ? activeWorkspace.name : "Belum ada workspace"}
               </span>
               <span className="text-xs text-slate-500">
-                {projects.length} proyek
+                {activeWorkspace ? `${projects.length} proyek` : "Buat workspace baru"}
               </span>
             </div>
           </div>
@@ -148,7 +147,7 @@ export function Sidebar({ workspaces, isOpen = false, setIsOpen }: SidebarProps)
               <button
                 key={ws.id}
                 className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm ${
-                  ws.id === activeWorkspace.id
+                  ws.id === activeWorkspace?.id
                     ? "bg-emerald-50 text-emerald-700 font-medium"
                     : "text-slate-700 hover:bg-slate-100"
                 }`}
