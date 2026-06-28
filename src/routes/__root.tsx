@@ -3,6 +3,17 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import appCss from "../styles.css?url";
+import type { Session, User } from "@supabase/supabase-js";
+import { supabase } from "#/lib/supabase";
+
+import { getServerSession } from "#/lib/auth";
+
+export type AuthContext = {
+  auth: {
+    user: User | null;
+    session: Session | null;
+  };
+};
 
 export const Route = createRootRoute({
   head: () => ({
@@ -15,7 +26,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: "Milo",
       },
     ],
     links: [
@@ -27,12 +38,22 @@ export const Route = createRootRoute({
   }),
   shellComponent: RootDocument,
 
-  context: () => ({
+  context: (): AuthContext => ({
     auth: {
       user: null,
       session: null,
     },
   }),
+
+  beforeLoad: async () => {
+    const session = await getServerSession();
+    return {
+      auth: {
+        user: session?.user ?? null,
+        session: session ?? null,
+      },
+    };
+  },
 
   notFoundComponent: () => (
     <div className="flex h-screen items-center justify-center">
