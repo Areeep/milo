@@ -2,6 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "#/lib/supabase";
 import { Loader2, Building2, UploadCloud } from "lucide-react";
+import { useWorkspace } from "#/contexts/WorkspaceContext";
 
 export const Route = createFileRoute("/_app/create-workspace")({
   component: CreateWorkspacePage,
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/_app/create-workspace")({
 
 function CreateWorkspacePage() {
   const router = useRouter();
+  const { setActiveWorkspaceId } = useWorkspace();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -85,6 +87,7 @@ function CreateWorkspacePage() {
       return;
     }
 
+    setActiveWorkspaceId(workspace.id);
     await router.invalidate();
     await router.navigate({ to: "/dashboard" });
   };
