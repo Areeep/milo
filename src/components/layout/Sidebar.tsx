@@ -32,7 +32,6 @@ type SidebarProps = {
 };
 
 export function Sidebar({ workspaces }: SidebarProps) {
-  const router = useRouter();
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(
     workspaces[0] || null
   );

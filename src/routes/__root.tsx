@@ -4,7 +4,6 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import appCss from "../styles.css?url";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "#/lib/supabase";
 
 import { getServerSession } from "#/lib/auth";
 
