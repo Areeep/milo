@@ -50,7 +50,7 @@ function RegisterPage() {
       return;
     }
 
-    await router.navigate({ to: "/login" });
+    await router.navigate({ to: "/create-workspace" });
   };
 
   return (
