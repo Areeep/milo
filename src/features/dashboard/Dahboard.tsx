@@ -143,7 +143,7 @@ export default function Dashboard() {
   }, [user]);
 
   return (
-    <main className="flex min-h-screen flex-col gap-8 bg-white px-5 py-10 text-black *:font-sans md:px-24">
+    <main className="flex min-h-screen flex-col gap-8 bg-white px-5 py-10 text-black md:px-24">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold">
