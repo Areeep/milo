@@ -1,7 +1,7 @@
 import { supabase } from "#/lib/supabase";
 import { Route as rootRoute } from "#/routes/__root";
 import { Icon } from "@iconify/react";
-import { useNavigate } from "@tanstack/react-router";
+
 import { useEffect, useState } from "react";
 
 type MetadataProps = {

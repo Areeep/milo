@@ -1,4 +1,4 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
   Building2,
   ChevronDown,
@@ -29,9 +29,11 @@ type Project = {
 
 type SidebarProps = {
   workspaces: Workspace[];
+  isOpen?: boolean;
+  setIsOpen?: (isOpen: boolean) => void;
 };
 
-export function Sidebar({ workspaces }: SidebarProps) {
+export function Sidebar({ workspaces, isOpen = false, setIsOpen }: SidebarProps) {
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(
     workspaces[0] || null
   );
@@ -92,7 +94,20 @@ export function Sidebar({ workspaces }: SidebarProps) {
   if (!activeWorkspace) return null;
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-slate-200 bg-white">
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-gray-900/50 md:hidden" 
+          onClick={() => setIsOpen && setIsOpen(false)} 
+        />
+      )}
+      
+      <aside 
+        className={`fixed inset-y-0 left-0 z-50 flex h-full w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-300 md:relative md:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
       {/* Header */}
       <div className="relative border-b border-slate-200 p-4" ref={workspaceMenuRef}>
         <div
@@ -263,6 +278,7 @@ export function Sidebar({ workspaces }: SidebarProps) {
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
