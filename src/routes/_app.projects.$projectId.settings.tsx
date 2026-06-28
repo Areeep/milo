@@ -1,5 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { ProjectSettings } from '#/features/projects/ProjectSettings'
 
 export const Route = createFileRoute('/_app/projects/$projectId/settings')({
-  component: () => <div className="p-8">Halaman Pengaturan</div>,
+  component: () => {
+    const { projectId } = Route.useParams()
+    return <ProjectSettings projectId={projectId} />
+  },
 })

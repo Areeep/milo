@@ -151,7 +151,7 @@ export function Projects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProjects.map((project) => (
-            <Link to={'/projects/' + project.id} key={project.id} className="border border-gray-100 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-all flex flex-col h-full group">
+            <Link to={'/projects/' + project.id + '/tasks'} key={project.id} className="border border-gray-100 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-all flex flex-col h-full group">
               <h3 className="font-semibold text-gray-900 text-lg mb-1">{project.name}</h3>
               <p className="text-sm text-gray-500 mb-8 flex-1 line-clamp-2">{project.description || "No description"}</p>
               

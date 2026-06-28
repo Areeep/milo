@@ -195,9 +195,32 @@ ON projects FOR DELETE USING (
   workspace_id IN (SELECT get_user_workspaces())
 );
 
--- 5. PROJECT ROLES
 CREATE POLICY "Users can view roles for their projects." 
 ON project_roles FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = project_roles.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+CREATE POLICY "Workspace members can insert project roles." 
+ON project_roles FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = project_roles.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+CREATE POLICY "Workspace members can update project roles." 
+ON project_roles FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = project_roles.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+CREATE POLICY "Workspace members can delete project roles." 
+ON project_roles FOR DELETE USING (
   EXISTS (
     SELECT 1 FROM projects p
     WHERE p.id = project_roles.project_id AND p.workspace_id IN (SELECT get_user_workspaces())

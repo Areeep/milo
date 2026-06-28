@@ -19,6 +19,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppCreateWorkspaceRouteImport } from './routes/_app.create-workspace'
 import { Route as AppProjectsIndexRouteImport } from './routes/_app.projects.index'
 import { Route as AppProjectsProjectIdRouteImport } from './routes/_app.projects.$projectId'
+import { Route as AppProjectsProjectIdIndexRouteImport } from './routes/_app.projects.$projectId.index'
 import { Route as AppProjectsProjectIdTasksRouteImport } from './routes/_app.projects.$projectId.tasks'
 import { Route as AppProjectsProjectIdSettingsRouteImport } from './routes/_app.projects.$projectId.settings'
 import { Route as AppProjectsProjectIdCalendarRouteImport } from './routes/_app.projects.$projectId.calendar'
@@ -72,6 +73,12 @@ const AppProjectsProjectIdRoute = AppProjectsProjectIdRouteImport.update({
   path: '/projects/$projectId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProjectsProjectIdIndexRoute =
+  AppProjectsProjectIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
 const AppProjectsProjectIdTasksRoute =
   AppProjectsProjectIdTasksRouteImport.update({
     id: '/tasks',
@@ -110,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/calendar': typeof AppProjectsProjectIdCalendarRoute
   '/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
   '/projects/$projectId/tasks': typeof AppProjectsProjectIdTasksRoute
+  '/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,12 +126,12 @@ export interface FileRoutesByTo {
   '/team': typeof AppTeamRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
-  '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/projects': typeof AppProjectsIndexRoute
   '/projects/$projectId/analytics': typeof AppProjectsProjectIdAnalyticsRoute
   '/projects/$projectId/calendar': typeof AppProjectsProjectIdCalendarRoute
   '/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
   '/projects/$projectId/tasks': typeof AppProjectsProjectIdTasksRoute
+  '/projects/$projectId': typeof AppProjectsProjectIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/_app/projects/$projectId/calendar': typeof AppProjectsProjectIdCalendarRoute
   '/_app/projects/$projectId/settings': typeof AppProjectsProjectIdSettingsRoute
   '/_app/projects/$projectId/tasks': typeof AppProjectsProjectIdTasksRoute
+  '/_app/projects/$projectId/': typeof AppProjectsProjectIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/calendar'
     | '/projects/$projectId/settings'
     | '/projects/$projectId/tasks'
+    | '/projects/$projectId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -165,12 +175,12 @@ export interface FileRouteTypes {
     | '/team'
     | '/login'
     | '/register'
-    | '/projects/$projectId'
     | '/projects'
     | '/projects/$projectId/analytics'
     | '/projects/$projectId/calendar'
     | '/projects/$projectId/settings'
     | '/projects/$projectId/tasks'
+    | '/projects/$projectId'
   id:
     | '__root__'
     | '/'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/_app/projects/$projectId/calendar'
     | '/_app/projects/$projectId/settings'
     | '/_app/projects/$projectId/tasks'
+    | '/_app/projects/$projectId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -267,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsProjectIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/projects/$projectId/': {
+      id: '/_app/projects/$projectId/'
+      path: '/'
+      fullPath: '/projects/$projectId/'
+      preLoaderRoute: typeof AppProjectsProjectIdIndexRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
     '/_app/projects/$projectId/tasks': {
       id: '/_app/projects/$projectId/tasks'
       path: '/tasks'
@@ -303,6 +321,7 @@ interface AppProjectsProjectIdRouteChildren {
   AppProjectsProjectIdCalendarRoute: typeof AppProjectsProjectIdCalendarRoute
   AppProjectsProjectIdSettingsRoute: typeof AppProjectsProjectIdSettingsRoute
   AppProjectsProjectIdTasksRoute: typeof AppProjectsProjectIdTasksRoute
+  AppProjectsProjectIdIndexRoute: typeof AppProjectsProjectIdIndexRoute
 }
 
 const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
@@ -310,6 +329,7 @@ const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
   AppProjectsProjectIdCalendarRoute: AppProjectsProjectIdCalendarRoute,
   AppProjectsProjectIdSettingsRoute: AppProjectsProjectIdSettingsRoute,
   AppProjectsProjectIdTasksRoute: AppProjectsProjectIdTasksRoute,
+  AppProjectsProjectIdIndexRoute: AppProjectsProjectIdIndexRoute,
 }
 
 const AppProjectsProjectIdRouteWithChildren =

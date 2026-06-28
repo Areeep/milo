@@ -94,10 +94,10 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
   }
 
   const tabs = [
-    { name: "Tasks", to: `/_app/projects/${projectId}/tasks` },
-    { name: "Calendar", to: `/_app/projects/${projectId}/calendar` },
-    { name: "Analytics", to: `/_app/projects/${projectId}/analytics` },
-    { name: "Settings", to: `/_app/projects/${projectId}/settings` },
+    { name: "Tasks", to: `/projects/${projectId}/tasks` },
+    { name: "Calendar", to: `/projects/${projectId}/calendar` },
+    { name: "Analytics", to: `/projects/${projectId}/analytics` },
+    { name: "Settings", to: `/projects/${projectId}/settings` },
   ];
 
   return (
