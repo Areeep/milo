@@ -3,6 +3,7 @@ import { Plus, Search } from "lucide-react";
 import { Route as appRoute } from "#/routes/_app";
 import { supabase } from "#/lib/supabase";
 import { CreateProjectModal } from "../dashboard/CreateProjectModal";
+import { Link } from "@tanstack/react-router";
 
 type Project = {
   id: string;
@@ -11,6 +12,7 @@ type Project = {
   status: string;
   priority: string;
   progress: number;
+  tasks: { count: number }[];
 };
 
 export function Projects() {
@@ -35,7 +37,7 @@ export function Projects() {
       try {
         const { data, error } = await supabase
           .from("projects")
-          .select("*")
+          .select("*, tasks(count)")
           .eq("workspace_id", currentWorkspaceId)
           .order("created_at", { ascending: false });
 
@@ -149,7 +151,7 @@ export function Projects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProjects.map((project) => (
-            <div key={project.id} className="border border-gray-100 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-all flex flex-col h-full">
+            <Link to={'/projects/' + project.id} key={project.id} className="border border-gray-100 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-all flex flex-col h-full group">
               <h3 className="font-semibold text-gray-900 text-lg mb-1">{project.name}</h3>
               <p className="text-sm text-gray-500 mb-8 flex-1 line-clamp-2">{project.description || "No description"}</p>
               
@@ -173,7 +175,11 @@ export function Projects() {
                   <div className="h-full bg-blue-600 rounded-full" style={{ width: `${project.progress || 0}%` }}></div>
                 </div>
               </div>
-            </div>
+              <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                 <span className="text-xs text-gray-500 font-medium">{project.tasks[0]?.count || 0} Tasks</span>
+                 <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">View Project &rarr;</span>
+              </div>
+            </Link>
           ))}
         </div>
       )}
