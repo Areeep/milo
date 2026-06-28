@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Icon } from "@iconify/react";
-import { Route as appRoute } from "#/routes/_app";
 import { supabase } from "#/lib/supabase";
 import { InviteMemberModal } from "./InviteMemberModal";
+import { useWorkspace } from "#/contexts/WorkspaceContext";
 
 type Member = {
   id: string;
@@ -16,9 +16,9 @@ type Member = {
 };
 
 export function Team() {
-  const { workspaces } = appRoute.useLoaderData();
-  const currentWorkspaceId = workspaces[0]?.id;
-  const currentWorkspaceName = workspaces[0]?.name || "Workspace";
+  const { activeWorkspace } = useWorkspace();
+  const currentWorkspaceId = activeWorkspace?.id;
+  const currentWorkspaceName = activeWorkspace?.name || "Workspace";
 
   const [members, setMembers] = useState<Member[]>([]);
   const [activeProjectsCount, setActiveProjectsCount] = useState(0);
@@ -222,7 +222,7 @@ export function Team() {
       <InviteMemberModal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
-        workspaceId={currentWorkspaceId}
+        workspaceId={currentWorkspaceId ?? null}
         workspaceName={currentWorkspaceName}
         onInvited={() => {
           // Reload page to reflect new member

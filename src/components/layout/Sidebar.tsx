@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "#/lib/supabase";
+import { useWorkspace } from "#/contexts/WorkspaceContext";
 
 type Workspace = {
   id: string;
@@ -34,20 +35,11 @@ type SidebarProps = {
 };
 
 export function Sidebar({ workspaces, isOpen = false, setIsOpen }: SidebarProps) {
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(
-    workspaces[0] || null
-  );
+  const { activeWorkspace, setActiveWorkspaceId } = useWorkspace();
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [openProjects, setOpenProjects] = useState<Record<string, boolean>>({});
   const workspaceMenuRef = useRef<HTMLDivElement>(null);
-
-  // Sync activeWorkspace when workspaces prop changes (e.g. after creating the first workspace)
-  useEffect(() => {
-    if (!activeWorkspace && workspaces.length > 0) {
-      setActiveWorkspace(workspaces[0]);
-    }
-  }, [workspaces, activeWorkspace]);
 
   // Fetch projects when active workspace changes
   useEffect(() => {
@@ -152,7 +144,7 @@ export function Sidebar({ workspaces, isOpen = false, setIsOpen }: SidebarProps)
                     : "text-slate-700 hover:bg-slate-100"
                 }`}
                 onClick={() => {
-                  setActiveWorkspace(ws);
+                  setActiveWorkspaceId(ws.id);
                   setIsWorkspaceMenuOpen(false);
                 }}
               >

@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Search } from "lucide-react";
 import { Route as appRoute } from "#/routes/_app";
+import { Link } from "@tanstack/react-router";
+import { useWorkspace } from "#/contexts/WorkspaceContext";
 import { supabase } from "#/lib/supabase";
 import { CreateProjectModal } from "../dashboard/CreateProjectModal";
-import { Link } from "@tanstack/react-router";
 
 type Project = {
   id: string;
@@ -16,9 +17,9 @@ type Project = {
 };
 
 export function Projects() {
-  const { workspaces } = appRoute.useLoaderData();
-  const currentWorkspaceId = workspaces[0]?.id;
-  const currentWorkspaceName = workspaces[0]?.name || "Workspace";
+  const { activeWorkspace } = useWorkspace();
+  const currentWorkspaceId = activeWorkspace?.id;
+  const currentWorkspaceName = activeWorkspace?.name || "Workspace";
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);

@@ -276,3 +276,46 @@ ON tasks FOR DELETE USING (
     WHERE p.id = tasks.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
   )
 );
+
+-- ==========================================
+-- TRIGGERS
+-- ==========================================
+
+-- Trigger to automatically create a profile for new users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, username, email, avatar_url)
+  VALUES (
+    new.id, 
+    COALESCE(new.raw_user_meta_data->>'username', 'User ' || substr(new.id::text, 1, 8)), 
+    new.email,
+    null
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Remove the trigger if it already exists to prevent duplication on re-runs
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ==========================================
+-- STORAGE POLICIES
+-- ==========================================
+
+-- Pastikan bucket 'avatars' sudah ada (jika di-execute via SQL)
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('avatars', 'avatars', true) 
+ON CONFLICT (id) DO NOTHING;
+
+-- RLS Storage Objects (Supaya bisa upload & baca gambar avatar)
+CREATE POLICY "Avatar images are publicly accessible." 
+ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+
+CREATE POLICY "Anyone can upload an avatar." 
+ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars');
+

@@ -1,7 +1,7 @@
 import { supabase } from "#/lib/supabase";
 import { Route as rootRoute } from "#/routes/__root";
-import { Route as appRoute } from "#/routes/_app";
 import { Icon } from "@iconify/react";
+import { useWorkspace } from "#/contexts/WorkspaceContext";
 
 import { useEffect, useState } from "react";
 import { CreateProjectModal } from "./CreateProjectModal";
@@ -153,8 +153,8 @@ function TaskListCard({ title, icon, iconColor, count, tasks, badgeBg, badgeColo
 export default function Dashboard() {
   const { auth } = rootRoute.useRouteContext();
   const user = auth.user;
-  const { workspaces } = appRoute.useLoaderData();
-  const currentWorkspaceName = workspaces[0]?.name || "Workspace";
+  const { activeWorkspace } = useWorkspace();
+  const currentWorkspaceName = activeWorkspace?.name || "Workspace";
 
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -175,22 +175,13 @@ export default function Dashboard() {
       setLoading(true);
 
       try {
-        // Cari workspace milik user
-        const { data: workspaceMember, error: workspaceError } = await supabase
-          .from("workspace_members")
-          .select("workspace_id")
-          .eq("user_id", user.id)
-          .limit(1)
-          .maybeSingle();
-
-        if (workspaceError) throw workspaceError;
-
-        if (!workspaceMember) {
+        const currentWorkspaceId = activeWorkspace?.id;
+        
+        if (!currentWorkspaceId) {
           console.log("User belum punya workspace");
           return;
         }
 
-        const currentWorkspaceId = workspaceMember.workspace_id;
         setWorkspaceId(currentWorkspaceId);
 
         const [
@@ -290,7 +281,7 @@ export default function Dashboard() {
     };
 
     fetchDashboard();
-  }, [user]);
+  }, [user, activeWorkspace]);
 
   return (
     <main className="flex min-h-screen flex-col gap-8 bg-white px-5 py-10 text-black md:px-24">

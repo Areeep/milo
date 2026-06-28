@@ -11,6 +11,7 @@ function CreateWorkspacePage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,10 +36,31 @@ function CreateWorkspacePage() {
       return;
     }
     
-    // 2. Create workspace
+    // 2. Upload Avatar if selected
+    let finalAvatarUrl = null;
+    const fileInput = document.getElementById("logo") as HTMLInputElement;
+    const file = fileInput.files?.[0];
+
+    if (file) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `workspace-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error("Failed to upload avatar:", uploadError);
+      } else {
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+        finalAvatarUrl = publicUrl;
+      }
+    }
+    
+    // 3. Create workspace
     const { data: workspace, error: workspaceError } = await supabase
       .from("workspaces")
-      .insert({ name, avatar_url: null })
+      .insert({ name, avatar_url: finalAvatarUrl })
       .select()
       .single();
 
@@ -71,8 +93,12 @@ function CreateWorkspacePage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
-            <Building2 className="h-6 w-6 text-emerald-600" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 overflow-hidden">
+            {logoPreview ? (
+              <img src={logoPreview} alt="Workspace Icon" className="h-full w-full object-cover" />
+            ) : (
+              <Building2 className="h-6 w-6 text-emerald-600" />
+            )}
           </div>
           <h1 className="text-2xl font-bold text-slate-950">Buat Ruang Kerja</h1>
           <p className="mt-2 text-sm text-slate-600">
@@ -91,11 +117,27 @@ function CreateWorkspacePage() {
             <span className="text-sm font-medium text-slate-700">Logo Ruang Kerja</span>
             <div className="mt-2 flex justify-center rounded-lg border border-dashed border-slate-300 px-6 py-8">
               <div className="text-center">
-                <UploadCloud className="mx-auto h-8 w-8 text-slate-400" />
-                <div className="mt-4 flex text-sm leading-6 text-slate-600">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Preview" className="mx-auto h-20 w-20 rounded-md object-cover shadow-sm mb-4" />
+                ) : (
+                  <UploadCloud className="mx-auto h-8 w-8 text-slate-400" />
+                )}
+                <div className="mt-4 flex justify-center text-sm leading-6 text-slate-600">
                   <span className="relative cursor-pointer rounded-md bg-white font-semibold text-emerald-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-emerald-600 focus-within:ring-offset-2 hover:text-emerald-500">
-                    Upload file
-                    <input id="logo" name="logo" type="file" className="sr-only" accept="image/*" />
+                    {logoPreview ? "Ganti file" : "Upload file"}
+                    <input 
+                      id="logo" 
+                      name="logo" 
+                      type="file" 
+                      className="sr-only" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setLogoPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
                   </span>
                   <p className="pl-1">atau drag and drop</p>
                 </div>
