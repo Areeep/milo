@@ -1,8 +1,10 @@
 import { supabase } from "#/lib/supabase";
 import { Route as rootRoute } from "#/routes/__root";
+import { Route as appRoute } from "#/routes/_app";
 import { Icon } from "@iconify/react";
 
 import { useEffect, useState } from "react";
+import { CreateProjectModal } from "./CreateProjectModal";
 
 type MetadataProps = {
   title: string;
@@ -151,9 +153,13 @@ function TaskListCard({ title, icon, iconColor, count, tasks, badgeBg, badgeColo
 export default function Dashboard() {
   const { auth } = rootRoute.useRouteContext();
   const user = auth.user;
+  const { workspaces } = appRoute.useLoaderData();
+  const currentWorkspaceName = workspaces[0]?.name || "Workspace";
 
   console.log(auth);
 
+  const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [metadata, setMetadata] = useState<MetadataProps[]>([]);
   const [dashboardData, setDashboardData] = useState<any>({
@@ -186,7 +192,8 @@ export default function Dashboard() {
           return;
         }
 
-        const workspaceId = workspaceMember.workspace_id;
+        const currentWorkspaceId = workspaceMember.workspace_id;
+        setWorkspaceId(currentWorkspaceId);
 
         const [
           { data: projectStats },
@@ -197,7 +204,7 @@ export default function Dashboard() {
           supabase
             .from("workspace_project_stats")
             .select("*")
-            .eq("workspace_id", workspaceId)
+            .eq("workspace_id", currentWorkspaceId)
             .maybeSingle(),
 
           supabase
@@ -215,7 +222,7 @@ export default function Dashboard() {
           supabase
             .from("projects")
             .select("*, project_members(count)")
-            .eq("workspace_id", workspaceId)
+            .eq("workspace_id", currentWorkspaceId)
             .order("created_at", { ascending: false })
             .limit(3),
         ]);
@@ -297,7 +304,10 @@ export default function Dashboard() {
           <p>Ini ringkasan aktivitas proyekmu</p>
         </div>
 
-        <button className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-white md:w-fit">
+        <button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-white md:w-fit"
+        >
           <Icon icon="ic:round-plus" className="" />
           Project Baru
         </button>
@@ -353,6 +363,16 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <CreateProjectModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        workspaceId={workspaceId}
+        workspaceName={currentWorkspaceName}
+        onProjectCreated={() => {
+          window.location.reload();
+        }}
+      />
     </main>
   );
 }

@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Sidebar } from "#/components/layout/Sidebar";
 import { Header } from "#/components/layout/Header";
 import { getServerWorkspaces } from "#/lib/auth";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_app")({
   beforeLoad: ({ context }) => {
@@ -19,8 +20,6 @@ export const Route = createFileRoute("/_app")({
   },
   component: RouteComponent,
 });
-
-import { useState } from "react";
 
 function RouteComponent() {
   const { workspaces } = Route.useLoaderData();
