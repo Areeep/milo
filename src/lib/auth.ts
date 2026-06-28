@@ -23,11 +23,15 @@ export const getServerSession = createServerFn({ method: "GET" }).handler(async 
   let profile = null;
 
   if (session?.user) {
-    const { data: profileData } = await supabase
+    const { data: profileData, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', session.user.id)
       .maybeSingle();
+      
+    if (error) {
+      console.error("[Profile Fetch Error]:", error);
+    }
     profile = profileData;
   }
 
