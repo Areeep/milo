@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabase } from "#/lib/supabase";
 import { Loader2, Building2, UploadCloud } from "lucide-react";
 import { useWorkspace } from "#/contexts/WorkspaceContext";
+import { toast } from "react-hot-toast";
 
 export const Route = createFileRoute("/_app/create-workspace")({
   component: CreateWorkspacePage,
@@ -88,6 +89,7 @@ function CreateWorkspacePage() {
     }
 
     setActiveWorkspaceId(workspace.id);
+    toast.success("Ruang kerja berhasil dibuat");
     await router.invalidate();
     await router.navigate({ to: "/dashboard" });
   };

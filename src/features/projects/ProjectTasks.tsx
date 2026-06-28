@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
+import { toast } from "react-hot-toast";
 import { TaskDetailModal } from "./TaskDetailModal";
 
 export function ProjectTasks({ projectId }: { projectId: string }) {
@@ -35,6 +36,10 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
     };
 
     if (projectId) fetchTasks();
+
+    const handleRefresh = () => fetchTasks();
+    window.addEventListener('refresh-tasks', handleRefresh);
+    return () => window.removeEventListener('refresh-tasks', handleRefresh);
   }, [projectId]);
 
   const handleStatusChange = async (taskId: string, newStatus: string) => {
@@ -46,8 +51,10 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
 
       if (error) throw error;
       setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
-    } catch (err) {
+      toast.success("Status tugas diperbarui");
+    } catch (err: any) {
       console.error("Error updating status:", err);
+      toast.error(err.message || "Gagal memperbarui status");
     }
   };
 
@@ -72,8 +79,10 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
       if (error) throw error;
       setTasks(tasks.map(t => selectedTaskIds.has(t.id) ? { ...t, status: newStatus } : t));
       setSelectedTaskIds(new Set());
-    } catch (err) {
+      toast.success("Status tugas diperbarui");
+    } catch (err: any) {
       console.error("Error toggling tasks done status:", err);
+      toast.error(err.message || "Gagal memperbarui status");
     }
   };
 
@@ -88,8 +97,10 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
       if (error) throw error;
       setTasks(tasks.filter(t => !selectedTaskIds.has(t.id)));
       setSelectedTaskIds(new Set());
-    } catch (err) {
+      toast.success("Tugas berhasil dihapus");
+    } catch (err: any) {
       console.error("Error deleting tasks:", err);
+      toast.error(err.message || "Gagal menghapus tugas");
     }
   };
 
@@ -205,9 +216,16 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-400">Loading tasks...</td>
-              </tr>
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="border-b border-gray-100 animate-pulse">
+                  <td className="px-6 py-4"><div className="w-4 h-4 rounded bg-gray-200"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-3/4"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
+                </tr>
+              ))
             ) : filteredTasks.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-400">No tasks found.</td>

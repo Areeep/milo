@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
+import { toast } from "react-hot-toast";
 
 export function InviteMemberModal({
   isOpen,
@@ -73,9 +74,11 @@ export function InviteMemberModal({
       setRole("member");
       onInvited();
       onClose();
+      toast.success("Anggota berhasil diundang");
     } catch (err: any) {
       console.error("Error inviting member:", err);
       setError(err.message || "Failed to invite member. Please try again.");
+      toast.error(err.message || "Gagal mengundang anggota");
     } finally {
       setLoading(false);
     }

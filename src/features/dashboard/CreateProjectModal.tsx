@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
+import { toast } from "react-hot-toast";
 
 type Profile = {
   id: string;
@@ -107,9 +108,10 @@ export function CreateProjectModal({
       resetForm();
       onProjectCreated();
       onClose();
-    } catch (error) {
+      toast.success("Proyek berhasil dibuat");
+    } catch (error: any) {
       console.error("Error creating project:", error);
-      alert("Failed to create project. Please try again.");
+      toast.error(error.message || "Gagal membuat proyek. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }

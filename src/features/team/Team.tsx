@@ -25,6 +25,7 @@ export function Team() {
   const [totalTasksCount, setTotalTasksCount] = useState(0);
   
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [search, setSearch] = useState("");
   
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -89,7 +90,7 @@ export function Team() {
     };
 
     fetchTeamData();
-  }, [currentWorkspaceId]);
+  }, [currentWorkspaceId, refreshTrigger]);
 
   const filteredMembers = useMemo(() => {
     if (!search) return members;
@@ -177,12 +178,18 @@ export function Team() {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {loading ? (
-              <tr>
-                <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
-                  <Icon icon="lucide:loader-2" className="w-5 h-5 animate-spin mx-auto mb-2" />
-                  Loading members...
-                </td>
-              </tr>
+              Array.from({ length: 3 }).map((_, i) => (
+                <tr key={i} className="animate-pulse">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-200"></div>
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-32"></div></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
+                </tr>
+              ))
             ) : filteredMembers.length === 0 ? (
               <tr>
                 <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
@@ -224,10 +231,7 @@ export function Team() {
         onClose={() => setIsInviteModalOpen(false)}
         workspaceId={currentWorkspaceId ?? null}
         workspaceName={currentWorkspaceName}
-        onInvited={() => {
-          // Reload page to reflect new member
-          window.location.reload();
-        }}
+        onInvited={() => setRefreshTrigger(prev => prev + 1)}
       />
     </div>
   );

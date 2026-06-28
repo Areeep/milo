@@ -1,6 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import { Toaster } from "react-hot-toast";
 
 import appCss from "../styles.css?url";
 import type { Session, User } from "@supabase/supabase-js";
@@ -79,6 +80,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         <TanStackDevtools
           config={{
             position: "bottom-right",

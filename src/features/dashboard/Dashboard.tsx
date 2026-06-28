@@ -159,6 +159,7 @@ export default function Dashboard() {
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [metadata, setMetadata] = useState<MetadataProps[]>([]);
   const [dashboardData, setDashboardData] = useState<any>({
     projects: [],
@@ -281,7 +282,7 @@ export default function Dashboard() {
     };
 
     fetchDashboard();
-  }, [user, activeWorkspace]);
+  }, [user, activeWorkspace, refreshTrigger]);
 
   return (
     <main className="flex min-h-screen flex-col gap-8 bg-white px-5 py-10 text-black md:px-24">
@@ -359,7 +360,7 @@ export default function Dashboard() {
         workspaceId={workspaceId}
         workspaceName={currentWorkspaceName}
         onProjectCreated={() => {
-          window.location.reload();
+          setRefreshTrigger(prev => prev + 1);
         }}
       />
     </main>

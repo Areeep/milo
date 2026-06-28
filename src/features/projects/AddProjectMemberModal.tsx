@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
+import { toast } from "react-hot-toast";
 
 export function AddProjectMemberModal({
   isOpen,
@@ -114,9 +115,11 @@ export function AddProjectMemberModal({
       onAdded();
       onClose();
       setRoleName("Member"); // Reset
+      toast.success("Anggota berhasil ditambahkan ke proyek");
     } catch (err: any) {
       console.error("Error adding project member:", err);
       setError(err.message || "Failed to add member.");
+      toast.error(err.message || "Gagal menambahkan anggota");
     } finally {
       setLoading(false);
     }

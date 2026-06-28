@@ -15,6 +15,7 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
   });
   const [loading, setLoading] = useState(true);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (!projectId) return;
@@ -72,11 +73,11 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
     };
 
     fetchProjectData();
-  }, [projectId]);
+  }, [projectId, refreshTrigger]);
 
   const handleTaskCreated = () => {
-    // We can reload the page or re-fetch data. Reloading for simplicity.
-    window.location.reload();
+    setRefreshTrigger(prev => prev + 1);
+    window.dispatchEvent(new Event('refresh-tasks'));
   };
 
   if (loading) {

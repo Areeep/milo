@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "#/lib/supabase";
+import { toast } from "react-hot-toast";
 
 type ProjectMember = {
   id: string;
@@ -89,9 +90,11 @@ export function CreateTaskModal({
 
       onTaskCreated();
       onClose();
+      toast.success("Tugas berhasil dibuat");
     } catch (err: any) {
       console.error("Error creating task:", err);
       setError(err.message || "Failed to create task.");
+      toast.error(err.message || "Gagal membuat tugas");
     } finally {
       setLoading(false);
     }

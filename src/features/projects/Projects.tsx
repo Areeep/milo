@@ -23,6 +23,7 @@ export function Projects() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -52,7 +53,7 @@ export function Projects() {
     };
 
     fetchProjects();
-  }, [currentWorkspaceId]);
+  }, [currentWorkspaceId, refreshTrigger]);
 
   const filteredProjects = useMemo(() => {
     return projects.filter(project => {
@@ -192,7 +193,7 @@ export function Projects() {
         workspaceName={currentWorkspaceName}
         onProjectCreated={() => {
           // Instead of a full page reload, we can just reload the data
-          window.location.reload(); 
+          setRefreshTrigger(prev => prev + 1); 
         }}
       />
     </div>
