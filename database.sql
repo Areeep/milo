@@ -113,3 +113,143 @@ CREATE OR REPLACE VIEW my_overdue_tasks WITH (security_invoker = on) AS
 SELECT * 
 FROM my_assigned_tasks
 WHERE due_date < NOW() AND status != 'done';
+
+-- ==========================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ==========================================
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workspaces ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workspace_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+
+-- Fungsi Helper untuk mendapatkan daftar workspace milik user (menghindari infinite recursion)
+CREATE OR REPLACE FUNCTION get_user_workspaces()
+RETURNS SETOF UUID AS $$
+BEGIN
+  RETURN QUERY SELECT workspace_id FROM workspace_members WHERE user_id = auth.uid();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 1. PROFILES
+CREATE POLICY "Public profiles are viewable by everyone." 
+ON profiles FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert their own profile." 
+ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile." 
+ON profiles FOR UPDATE USING (auth.uid() = id);
+
+-- 2. WORKSPACES
+CREATE POLICY "Users can view workspaces they are members of." 
+ON workspaces FOR SELECT USING (
+  id IN (SELECT get_user_workspaces())
+);
+
+CREATE POLICY "Users can create workspaces." 
+ON workspaces FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Workspace members can update workspace." 
+ON workspaces FOR UPDATE USING (
+  id IN (SELECT get_user_workspaces())
+);
+
+-- 3. WORKSPACE MEMBERS
+CREATE POLICY "Users can view members of their workspaces." 
+ON workspace_members FOR SELECT USING (
+  workspace_id IN (SELECT get_user_workspaces())
+);
+
+CREATE POLICY "Workspace members can invite others." 
+ON workspace_members FOR INSERT WITH CHECK (
+  workspace_id IN (SELECT get_user_workspaces())
+);
+
+CREATE POLICY "Workspace members can delete members." 
+ON workspace_members FOR DELETE USING (
+  workspace_id IN (SELECT get_user_workspaces())
+);
+
+-- 4. PROJECTS
+CREATE POLICY "Users can view projects in their workspaces." 
+ON projects FOR SELECT USING (
+  workspace_id IN (SELECT get_user_workspaces())
+);
+
+CREATE POLICY "Workspace members can create projects." 
+ON projects FOR INSERT WITH CHECK (
+  workspace_id IN (SELECT get_user_workspaces())
+);
+
+CREATE POLICY "Workspace members can update projects." 
+ON projects FOR UPDATE USING (
+  workspace_id IN (SELECT get_user_workspaces())
+);
+
+CREATE POLICY "Workspace members can delete projects." 
+ON projects FOR DELETE USING (
+  workspace_id IN (SELECT get_user_workspaces())
+);
+
+-- 5. PROJECT ROLES
+CREATE POLICY "Users can view roles for their projects." 
+ON project_roles FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = project_roles.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+-- 6. PROJECT MEMBERS
+CREATE POLICY "Users can view members of their projects." 
+ON project_members FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = project_members.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+CREATE POLICY "Workspace members can add project members." 
+ON project_members FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = project_members.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+-- 7. TASKS
+CREATE POLICY "Users can view tasks in their projects." 
+ON tasks FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = tasks.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+CREATE POLICY "Workspace members can insert tasks." 
+ON tasks FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = tasks.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+CREATE POLICY "Workspace members can update tasks." 
+ON tasks FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = tasks.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
+
+CREATE POLICY "Workspace members can delete tasks." 
+ON tasks FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM projects p
+    WHERE p.id = tasks.project_id AND p.workspace_id IN (SELECT get_user_workspaces())
+  )
+);
