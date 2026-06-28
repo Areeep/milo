@@ -156,8 +156,6 @@ export default function Dashboard() {
   const { workspaces } = appRoute.useLoaderData();
   const currentWorkspaceName = workspaces[0]?.name || "Workspace";
 
-  console.log(auth);
-
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);

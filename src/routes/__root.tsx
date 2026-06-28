@@ -54,10 +54,10 @@ export const Route = createRootRoute({
   }),
 
   beforeLoad: async () => {
-    const { session, profile } = await getServerSession();
+    const { user, session, profile } = await getServerSession();
     return {
       auth: {
-        user: session?.user ?? null,
+        user: user ?? null,
         session: session ?? null,
         profile: profile ?? null,
       },

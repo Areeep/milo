@@ -47,10 +47,10 @@ export function AddProjectMemberModal({
         // Filter out those already in the project
         const available = workspaceMembers
           .filter(wm => !projectMemberIds.has(wm.user_id))
-          .map(wm => ({
+          .map((wm: any) => ({
             id: wm.user_id,
-            email: wm.profiles.email,
-            username: wm.profiles.username,
+            email: wm.profiles?.email || wm.profiles?.[0]?.email,
+            username: wm.profiles?.username || wm.profiles?.[0]?.username,
           }));
 
         setCandidates(available);

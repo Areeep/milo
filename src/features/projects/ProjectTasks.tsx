@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
+import { TaskDetailModal } from "./TaskDetailModal";
 
 export function ProjectTasks({ projectId }: { projectId: string }) {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Selection & Details
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+  const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<any | null>(null);
 
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
@@ -32,6 +37,62 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
     if (projectId) fetchTasks();
   }, [projectId]);
 
+  const handleStatusChange = async (taskId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from("tasks")
+        .update({ status: newStatus })
+        .eq("id", taskId);
+
+      if (error) throw error;
+      setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+    } catch (err) {
+      console.error("Error updating status:", err);
+    }
+  };
+
+  const handleToggleTask = (taskId: string) => {
+    const newSet = new Set(selectedTaskIds);
+    if (newSet.has(taskId)) newSet.delete(taskId);
+    else newSet.add(taskId);
+    setSelectedTaskIds(newSet);
+  };
+
+  const handleBulkToggleDone = async () => {
+    try {
+      const ids = Array.from(selectedTaskIds);
+      const allDone = ids.every(id => tasks.find(t => t.id === id)?.status === "done");
+      const newStatus = allDone ? "todo" : "done";
+
+      const { error } = await supabase
+        .from("tasks")
+        .update({ status: newStatus })
+        .in("id", ids);
+
+      if (error) throw error;
+      setTasks(tasks.map(t => selectedTaskIds.has(t.id) ? { ...t, status: newStatus } : t));
+      setSelectedTaskIds(new Set());
+    } catch (err) {
+      console.error("Error toggling tasks done status:", err);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      const ids = Array.from(selectedTaskIds);
+      const { error } = await supabase
+        .from("tasks")
+        .delete()
+        .in("id", ids);
+
+      if (error) throw error;
+      setTasks(tasks.filter(t => !selectedTaskIds.has(t.id)));
+      setSelectedTaskIds(new Set());
+    } catch (err) {
+      console.error("Error deleting tasks:", err);
+    }
+  };
+
   const filteredTasks = tasks.filter((task) => {
     const matchStatus = statusFilter ? task.status === statusFilter : true;
     const matchPriority = priorityFilter ? task.priority === priorityFilter : true;
@@ -48,20 +109,49 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "todo": return "To Do";
-      case "in_progress": return "In Progress";
-      case "review": return "Review";
-      case "done": return "Done";
-      default: return status;
-    }
-  };
-
   const assignees = Array.from(new Set(tasks.map(t => t.assignee_id))).filter(Boolean);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200">
+      {/* Action Bar (When Tasks Selected) */}
+      {selectedTaskIds.size > 0 && (
+        <div className="bg-blue-50/50 p-4 border-b border-gray-200 flex items-center justify-between">
+          <span className="text-sm font-medium text-blue-800">
+            {selectedTaskIds.size} task{selectedTaskIds.size > 1 ? "s" : ""} selected
+          </span>
+          <div className="flex gap-3">
+            {(() => {
+              const allDone = Array.from(selectedTaskIds).every(id => tasks.find(t => t.id === id)?.status === "done");
+              return (
+                <button
+                  onClick={handleBulkToggleDone}
+                  className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                  {allDone ? (
+                    <>
+                      <Icon icon="lucide:x-circle" className="w-4 h-4 text-gray-500" />
+                      Tandai Belum Selesai
+                    </>
+                  ) : (
+                    <>
+                      <Icon icon="lucide:check-circle-2" className="w-4 h-4 text-emerald-500" />
+                      Tandai Selesai
+                    </>
+                  )}
+                </button>
+              );
+            })()}
+            <button
+              onClick={handleBulkDelete}
+              className="bg-white border border-gray-300 hover:bg-red-50 text-red-600 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
+            >
+              <Icon icon="lucide:trash-2" className="w-4 h-4" />
+              Hapus
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="p-4 border-b border-gray-200 flex gap-4">
         <select 
@@ -123,23 +213,40 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-400">No tasks found.</td>
               </tr>
             ) : (
-              filteredTasks.map((task) => (
-                <tr key={task.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="w-2.5 h-2.5 rounded-full bg-gray-200"></div>
-                  </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">{task.title}</td>
-                  <td className="px-6 py-4">
-                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-sm ${getPriorityColor(task.priority)}`}>
-                      {task.priority}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-between w-28 cursor-pointer">
-                      <span>{getStatusText(task.status)}</span>
-                      <Icon icon="lucide:chevron-down" className="w-4 h-4 text-gray-400" />
-                    </div>
-                  </td>
+              filteredTasks.map((task) => {
+                const isDone = task.status === "done";
+                return (
+                  <tr 
+                    key={task.id} 
+                    onClick={() => setSelectedTaskForDetail(task)}
+                    className={`border-b border-gray-100 transition-colors cursor-pointer hover:bg-gray-50 ${isDone ? 'bg-gray-50 opacity-75' : ''}`}
+                  >
+                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="checkbox"
+                        checked={selectedTaskIds.has(task.id)}
+                        onChange={() => handleToggleTask(task.id)}
+                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </td>
+                    <td className={`px-6 py-4 font-medium ${isDone ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{task.title}</td>
+                    <td className="px-6 py-4">
+                      <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-sm ${getPriorityColor(task.priority)}`}>
+                        {task.priority}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                      <select
+                        value={task.status}
+                        onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                        className={`text-sm bg-transparent border border-transparent hover:border-gray-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer p-1 -ml-1 ${isDone ? 'text-gray-500' : 'text-gray-900'}`}
+                      >
+                        <option value="todo">To Do</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="review">Review</option>
+                        <option value="done">Done</option>
+                      </select>
+                    </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       {task.assignee?.avatar_url ? (
@@ -152,15 +259,32 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
                       <span>{task.assignee?.username || "Unassigned"}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-500">
+                  <td className={`px-6 py-4 ${isDone ? 'text-gray-400' : 'text-gray-500'}`}>
                     {task.due_date ? new Date(task.due_date).toLocaleDateString("en-GB", { day: '2-digit', month: 'short' }) : "-"}
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
+
+      <TaskDetailModal 
+        isOpen={!!selectedTaskForDetail}
+        onClose={() => setSelectedTaskForDetail(null)}
+        task={selectedTaskForDetail}
+        onDelete={async (taskId) => {
+          try {
+            const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+            if (error) throw error;
+            setTasks(tasks.filter(t => t.id !== taskId));
+            setSelectedTaskForDetail(null);
+          } catch (err) {
+            console.error(err);
+          }
+        }}
+      />
     </div>
   );
 }

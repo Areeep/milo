@@ -25,25 +25,26 @@ export const getServerSession = createServerFn({ method: "GET" }).handler(
       },
     );
 
+    const { data: { user } } = await supabase.auth.getUser();
     const { data } = await supabase.auth.getSession();
     const session = data.session;
 
-    if (!session?.user) {
-      return { session, profile: null };
+    if (!user) {
+      return { user: null, session, profile: null };
     }
 
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("*")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .maybeSingle();
 
     if (error) {
       console.error("[getServerSession] Profile fetch failed:", error.message);
-      return { session, profile: null };
+      return { user, session, profile: null };
     }
 
-    return { session, profile };
+    return { user, session, profile };
   },
 );
 

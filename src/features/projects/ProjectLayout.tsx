@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Outlet, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Plus } from "lucide-react";
 import { supabase } from "#/lib/supabase";
+import { CreateTaskModal } from "./CreateTaskModal";
 
 export function ProjectLayout({ projectId }: { projectId: string }) {
   const router = useRouter();
@@ -13,6 +14,7 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
     teamMembers: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
   useEffect(() => {
     if (!projectId) return;
@@ -72,6 +74,11 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
     fetchProjectData();
   }, [projectId]);
 
+  const handleTaskCreated = () => {
+    // We can reload the page or re-fetch data. Reloading for simplicity.
+    window.location.reload();
+  };
+
   if (loading) {
     return (
       <div className="p-8 animate-pulse bg-[#f8fafc] min-h-full">
@@ -116,7 +123,10 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
             {project.status.replace("_", " ")}
           </span>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center text-sm font-medium transition-colors">
+        <button 
+          onClick={() => setIsTaskModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center text-sm font-medium transition-colors"
+        >
           <Plus className="w-4 h-4 mr-2" />
           New Task
         </button>
@@ -173,6 +183,13 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
       <div className="flex-1">
         <Outlet />
       </div>
+
+      <CreateTaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        projectId={projectId}
+        onTaskCreated={handleTaskCreated}
+      />
     </div>
   );
 }
