@@ -12,6 +12,7 @@ function RegisterPage() {
     e.preventDefault();
 
     const form = new FormData(e.currentTarget);
+    const username = form.get("username") as string;
     const email = form.get("email") as string;
     const password = form.get("password") as string;
 
@@ -30,6 +31,7 @@ function RegisterPage() {
 
   return (
     <form onSubmit={handleRegister} className="flex w-80 flex-col gap-3">
+      <input name="username" placeholder="Username" className="border p-2" />
       <input name="email" placeholder="Email" className="border p-2" />
       <input
         name="password"

@@ -8,10 +8,18 @@ import { supabase } from "#/lib/supabase";
 
 import { getServerSession } from "#/lib/auth";
 
+export type Profile = {
+  id: string;
+  username: string;
+  email: string;
+  avatar_url: string | null;
+};
+
 export type AuthContext = {
   auth: {
     user: User | null;
     session: Session | null;
+    profile: Profile | null;
   };
 };
 
@@ -42,15 +50,17 @@ export const Route = createRootRoute({
     auth: {
       user: null,
       session: null,
+      profile: null,
     },
   }),
 
   beforeLoad: async () => {
-    const session = await getServerSession();
+    const { session, profile } = await getServerSession();
     return {
       auth: {
         user: session?.user ?? null,
         session: session ?? null,
+        profile: profile ?? null,
       },
     };
   },

@@ -19,5 +19,17 @@ export const getServerSession = createServerFn({ method: "GET" }).handler(async 
   });
 
   const { data } = await supabase.auth.getSession();
-  return data.session;
+  const session = data.session;
+  let profile = null;
+
+  if (session?.user) {
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    profile = profileData;
+  }
+
+  return { session, profile };
 });

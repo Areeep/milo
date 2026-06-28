@@ -86,7 +86,7 @@ CREATE TABLE tasks (
 -- ==========================================
 
 -- VIEW 1: Total Proyek dan Proyek Selesai per Workspace
-CREATE OR REPLACE VIEW workspace_project_stats AS
+CREATE OR REPLACE VIEW workspace_project_stats WITH (security_invoker = on) AS
 SELECT 
   workspace_id,
   COUNT(id) AS total_projects,
@@ -95,7 +95,7 @@ FROM projects
 GROUP BY workspace_id;
 
 -- VIEW 2: Tugas yang ditugaskan ke saya (Lintas Proyek)
-CREATE OR REPLACE VIEW my_assigned_tasks AS
+CREATE OR REPLACE VIEW my_assigned_tasks WITH (security_invoker = on) AS
 SELECT 
   t.id AS task_id,
   t.title,
@@ -109,7 +109,7 @@ FROM tasks t
 JOIN projects p ON t.project_id = p.id;
 
 -- VIEW 3: Tugas Overdue (Lintas Proyek)
-CREATE OR REPLACE VIEW my_overdue_tasks AS
+CREATE OR REPLACE VIEW my_overdue_tasks WITH (security_invoker = on) AS
 SELECT * 
 FROM my_assigned_tasks
 WHERE due_date < NOW() AND status != 'done';
