@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "#/lib/supabase";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "@tanstack/react-router";
 
 type ProjectMember = {
   id: string;
@@ -19,15 +20,16 @@ export function CreateTaskModal({
   projectId: string;
   onTaskCreated: () => void;
 }) {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [members, setMembers] = useState<ProjectMember[]>([]);
 
   // Form State
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium");
+  const [priority, setPriority] = useState("Menengah");
   const [assigneeId, setAssigneeId] = useState("");
-  const [status, setStatus] = useState("todo");
+  const [status, setStatus] = useState("Belum");
   const [dueDate, setDueDate] = useState("");
 
   const [error, setError] = useState<string | null>(null);
@@ -83,14 +85,17 @@ export function CreateTaskModal({
       // Reset form
       setTitle("");
       setDescription("");
-      setPriority("medium");
-      setStatus("todo");
+      setPriority("Menengah");
+      setStatus("Belum");
       setAssigneeId("");
       setDueDate("");
 
       onTaskCreated();
       onClose();
       toast.success("Tugas berhasil dibuat");
+      
+      // Navigate to tasks page
+      navigate({ to: "/projects/$projectId/tasks", params: { projectId } });
     } catch (err: any) {
       console.error("Error creating task:", err);
       setError(err.message || "Failed to create task.");
@@ -102,74 +107,78 @@ export function CreateTaskModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/50 p-4">
-      <div className="relative w-full max-w-2xl rounded-xl bg-white shadow-xl flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-gray-100 flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">Create New Task</h2>
+      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl bg-white shadow-xl">
+        <div className="flex-shrink-0 border-b border-gray-100 p-6">
+          <h2 className="text-xl font-bold text-gray-900">Bikin Tugas Baru</h2>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="flex-1 overflow-y-auto p-6">
           {error && (
             <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
-          <form id="create-task-form" onSubmit={handleSubmit} className="space-y-6">
+          <form
+            id="create-task-form"
+            onSubmit={handleSubmit}
+            className="space-y-6"
+          >
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Nama
               </label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Task title"
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 placeholder:text-gray-400"
+                placeholder="Nama Tugas"
+                className="w-full rounded-md border border-gray-300 px-4 py-2 text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Deskripsi
               </label>
               <textarea
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the task"
-                className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 resize-none placeholder:text-gray-400"
+                className="w-full resize-none rounded-md border border-gray-300 px-4 py-2 text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               {/* Note: Type dropdown is intentionally omitted based on previous DB schema decisions */}
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Priority
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Prioritas
                 </label>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 bg-white"
+                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                  <option value="Rendah">Rendah</option>
+                  <option value="Menengah">Menengah</option>
+                  <option value="Tinggi">Tinggi</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Assignee
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Penanggung Jawab
                 </label>
                 <select
                   value={assigneeId}
                   onChange={(e) => setAssigneeId(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 bg-white"
+                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
                 >
-                  <option value="">Unassigned</option>
+                  <option value="">Belum ada</option>
                   {members.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.username} ({m.email})
@@ -179,52 +188,52 @@ export function CreateTaskModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
                   Status
                 </label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 bg-white"
+                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
                 >
-                  <option value="todo">To Do</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="review">Review</option>
-                  <option value="done">Done</option>
+                  <option value="Belum">Belum</option>
+                  <option value="Dalam Proses">Dalam Proses</option>
+                  <option value="Menunggu Review">Menunggu Review</option>
+                  <option value="Selesai">Selesai</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Due Date
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Tenggat
                 </label>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 bg-white"
+                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </div>
           </form>
         </div>
 
-        <div className="p-6 border-t border-gray-100 flex-shrink-0 flex justify-end gap-3 bg-gray-50/50 rounded-b-xl">
+        <div className="flex flex-shrink-0 justify-end gap-3 rounded-b-xl border-t border-gray-100 bg-gray-50/50 p-6">
           <button
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
           >
-            Cancel
+            Batal
           </button>
           <button
             type="submit"
             form="create-task-form"
             disabled={loading}
-            className="flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+            className="flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Create Task"}
+            {loading ? "Membuat..." : "Bikin Tugas"}
           </button>
         </div>
       </div>

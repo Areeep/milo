@@ -63,6 +63,13 @@ export function Sidebar({
     };
 
     fetchProjects();
+
+    const handleRefresh = () => fetchProjects();
+    window.addEventListener("refresh-sidebar", handleRefresh);
+
+    return () => {
+      window.removeEventListener("refresh-sidebar", handleRefresh);
+    };
   }, [activeWorkspace]);
 
   // Handle clicking outside floating menu

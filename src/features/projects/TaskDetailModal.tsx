@@ -1,48 +1,100 @@
+import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
+import { supabase } from "#/lib/supabase";
+import { toast } from "react-hot-toast";
 
 type TaskDetailModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  task: any; // Using any for simplicity here to match existing data structure, could be properly typed
+  task: any; 
   onDelete?: (taskId: string) => void;
 };
 
 export function TaskDetailModal({ isOpen, onClose, task, onDelete }: TaskDetailModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [members, setMembers] = useState<any[]>([]);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState("");
+  const [status, setStatus] = useState("");
+  const [assigneeId, setAssigneeId] = useState("");
+  const [dueDate, setDueDate] = useState("");
+
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title || "");
+      setDescription(task.description || "");
+      setPriority(task.priority || "Menengah");
+      setStatus(task.status || "todo");
+      setAssigneeId(task.assignee_id || "");
+      setDueDate(task.due_date ? task.due_date.split("T")[0] : "");
+    }
+  }, [task]);
+
+  useEffect(() => {
+    if (!isOpen || !task?.project_id) return;
+    const fetchMembers = async () => {
+      const { data, error } = await supabase
+        .from("project_members")
+        .select("user_id, profiles(username, avatar_url)")
+        .eq("project_id", task.project_id);
+      if (!error && data) {
+        setMembers(data);
+      }
+    };
+    fetchMembers();
+  }, [isOpen, task?.project_id]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !task) return null;
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "bg-rose-100 text-rose-600";
-      case "medium":
-        return "bg-blue-100 text-blue-600";
-      case "low":
-        return "bg-emerald-100 text-emerald-600";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  };
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("tasks")
+        .update({
+          title: title.trim(),
+          description: description.trim() || null,
+          priority,
+          status,
+          assignee_id: assigneeId || null,
+          due_date: dueDate ? new Date(dueDate).toISOString() : null,
+        })
+        .eq("id", task.id);
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "todo":
-        return "To Do";
-      case "in_progress":
-        return "In Progress";
-      case "review":
-        return "Review";
-      case "done":
-        return "Done";
-      default:
-        return status;
+      if (error) throw error;
+      toast.success("Tugas berhasil diperbarui");
+      window.dispatchEvent(new Event("refresh-tasks"));
+      onClose();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Gagal memperbarui tugas");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/50 p-4">
-      <div className="relative w-full max-w-2xl rounded-xl bg-white shadow-xl flex flex-col max-h-[90vh]">
+      <div ref={modalRef} className="relative w-full max-w-2xl rounded-xl bg-white shadow-xl flex flex-col max-h-[90vh]">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">Task Details</h2>
+          <h2 className="text-xl font-bold text-gray-900">Detail Tugas</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -51,69 +103,86 @@ export function TaskDetailModal({ isOpen, onClose, task, onDelete }: TaskDetailM
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+        <div className="p-6 overflow-y-auto flex-1 space-y-5">
+          {/* Title */}
           <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{task.title}</h3>
-            <div className="flex items-center gap-3">
-              <span className={`text-xs uppercase font-bold tracking-wider px-2.5 py-1 rounded-sm ${getPriorityColor(task.priority)}`}>
-                {task.priority} Priority
-              </span>
-              <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                {getStatusText(task.status)}
-              </span>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Judul Tugas</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* Priority */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Prioritas</label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="Tinggi">Tinggi</option>
+                <option value="Menengah">Menengah</option>
+                <option value="Rendah">Rendah</option>
+              </select>
+            </div>
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="todo">To Do</option>
+                <option value="in_progress">In Progress</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+              </select>
             </div>
           </div>
 
+          {/* Description */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wide">
-              Description
-            </h4>
-            <div className="text-gray-600 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg border border-gray-100 min-h-[100px]">
-              {task.description || "No description provided."}
-            </div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Deskripsi</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Deskripsi tugas..."
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Assignee */}
             <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wide">
-                Assignee
-              </h4>
-              <div className="flex items-center gap-3">
-                {task.assignee?.avatar_url ? (
-                  <img
-                    src={task.assignee.avatar_url}
-                    alt=""
-                    className="w-10 h-10 rounded-full border border-gray-200"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center">
-                    <Icon icon="lucide:user" className="w-5 h-5 text-gray-400" />
-                  </div>
-                )}
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {task.assignee?.username || "Unassigned"}
-                  </p>
-                </div>
-              </div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Assignee</label>
+              <select
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">-- Pilih Assignee --</option>
+                {members.map((m) => (
+                  <option key={m.user_id} value={m.user_id}>
+                    {m.profiles?.username}
+                  </option>
+                ))}
+              </select>
             </div>
-
+            {/* Due Date */}
             <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wide">
-                Due Date
-              </h4>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Icon icon="lucide:calendar" className="w-5 h-5 text-gray-400" />
-                <span>
-                  {task.due_date
-                    ? new Date(task.due_date).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })
-                    : "No due date"}
-                </span>
-              </div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Due Date</label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
             </div>
           </div>
         </div>
@@ -121,20 +190,25 @@ export function TaskDetailModal({ isOpen, onClose, task, onDelete }: TaskDetailM
         <div className="p-6 border-t border-gray-100 flex-shrink-0 flex justify-between bg-gray-50/50 rounded-b-xl">
           {onDelete ? (
             <button
-              onClick={() => onDelete(task.id)}
+              onClick={() => {
+                onDelete(task.id);
+                onClose();
+              }}
               className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
             >
               <Icon icon="lucide:trash-2" className="w-4 h-4" />
-              Delete Task
+              Hapus Tugas
             </button>
           ) : (
             <div></div>
           )}
           <button
-            onClick={onClose}
-            className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            onClick={handleSave}
+            disabled={loading}
+            className="flex items-center gap-2 rounded-md bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
           >
-            Close
+            <Icon icon="lucide:save" className="w-4 h-4" />
+            {loading ? "Menyimpan..." : "Simpan"}
           </button>
         </div>
       </div>

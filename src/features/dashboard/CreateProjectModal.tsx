@@ -29,8 +29,8 @@ export function CreateProjectModal({
   // Form State
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("active");
-  const [priority, setPriority] = useState("medium");
+  const [status, setStatus] = useState("Aktif");
+  const [priority, setPriority] = useState("Menengah");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [projectLeadId, setProjectLeadId] = useState("");
@@ -85,16 +85,37 @@ export function CreateProjectModal({
 
       const newProjectId = projectData.id;
 
+      // 1.5 Create Default Roles
+      const { data: defaultRoles, error: rolesError } = await supabase
+        .from("project_roles")
+        .insert([
+          { project_id: newProjectId, role_name: "Owner" },
+          { project_id: newProjectId, role_name: "Anggota" },
+        ])
+        .select();
+
+      if (rolesError) throw rolesError;
+      
+      const ownerRole = defaultRoles?.find(r => r.role_name === "Owner");
+      const anggotaRole = defaultRoles?.find(r => r.role_name === "Anggota");
+
       // 2. Insert into project_members
+      const { data: userData } = await supabase.auth.getUser();
+      const currentUserId = userData?.user?.id;
+
       const allSelectedUserIds = new Set(selectedTeamMemberIds);
       if (projectLeadId) {
         allSelectedUserIds.add(projectLeadId);
+      }
+      if (currentUserId) {
+        allSelectedUserIds.add(currentUserId);
       }
 
       if (allSelectedUserIds.size > 0) {
         const memberInserts = Array.from(allSelectedUserIds).map(userId => ({
           project_id: newProjectId,
           user_id: userId,
+          role_id: userId === currentUserId ? ownerRole?.id : anggotaRole?.id,
         }));
 
         const { error: membersError } = await supabase
@@ -109,6 +130,7 @@ export function CreateProjectModal({
       onProjectCreated();
       onClose();
       toast.success("Proyek berhasil dibuat");
+      window.dispatchEvent(new Event("refresh-sidebar"));
     } catch (error: any) {
       console.error("Error creating project:", error);
       toast.error(error.message || "Gagal membuat proyek. Silakan coba lagi.");
@@ -120,8 +142,8 @@ export function CreateProjectModal({
   const resetForm = () => {
     setProjectName("");
     setDescription("");
-    setStatus("active");
-    setPriority("medium");
+    setStatus("Aktif");
+    setPriority("Menengah");
     setStartDate("");
     setEndDate("");
     setProjectLeadId("");
@@ -201,10 +223,10 @@ export function CreateProjectModal({
                   onChange={(e) => setStatus(e.target.value)}
                   className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
                 >
-                  <option value="active">Active</option>
-                  <option value="on_hold">Planning</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="Aktif">Aktif</option>
+                  <option value="Ditunda">Ditunda</option>
+                  <option value="Selesai">Selesai</option>
+                  <option value="Dibatalkan">Dibatalkan</option>
                 </select>
               </div>
 
@@ -219,9 +241,9 @@ export function CreateProjectModal({
                   onChange={(e) => setPriority(e.target.value)}
                   className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
                 >
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
+                  <option value="Tinggi">Tinggi</option>
+                  <option value="Menengah">Menengah</option>
+                  <option value="Rendah">Rendah</option>
                 </select>
               </div>
 

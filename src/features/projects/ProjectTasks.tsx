@@ -239,11 +239,12 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
                     onClick={() => setSelectedTaskForDetail(task)}
                     className={`border-b border-gray-100 transition-colors cursor-pointer hover:bg-gray-50 ${isDone ? 'bg-gray-50 opacity-75' : ''}`}
                   >
-                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-6 py-4">
                       <input 
                         type="checkbox"
                         checked={selectedTaskIds.has(task.id)}
                         onChange={() => handleToggleTask(task.id)}
+                        onClick={(e) => e.stopPropagation()}
                         className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
                     </td>
@@ -253,10 +254,11 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
                         {task.priority}
                       </span>
                     </td>
-                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-6 py-4">
                       <select
                         value={task.status}
                         onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
                         className={`text-sm bg-transparent border border-transparent hover:border-gray-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer p-1 -ml-1 ${isDone ? 'text-gray-500' : 'text-gray-900'}`}
                       >
                         <option value="todo">To Do</option>

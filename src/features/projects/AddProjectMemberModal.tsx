@@ -43,11 +43,11 @@ export function AddProjectMemberModal({
 
         if (pmError) throw pmError;
 
-        const projectMemberIds = new Set(projectMembers.map(m => m.user_id));
+        const projectMemberIds = new Set(projectMembers.map((m) => m.user_id));
 
         // Filter out those already in the project
         const available = workspaceMembers
-          .filter(wm => !projectMemberIds.has(wm.user_id))
+          .filter((wm) => !projectMemberIds.has(wm.user_id))
           .map((wm: any) => ({
             id: wm.user_id,
             email: wm.profiles?.email || wm.profiles?.[0]?.email,
@@ -74,7 +74,7 @@ export function AddProjectMemberModal({
 
     setLoading(true);
     setError(null);
-    
+
     try {
       // 1. Create a project role for this user
       // Note: in a more complex setup, you'd check if role exists. We'll just create a new one or use existing
@@ -147,7 +147,10 @@ export function AddProjectMemberModal({
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="user" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="user"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Workspace Member
               </label>
               {candidates.length > 0 ? (
@@ -156,7 +159,7 @@ export function AddProjectMemberModal({
                   required
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:text-sm"
                 >
                   {candidates.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -165,15 +168,18 @@ export function AddProjectMemberModal({
                   ))}
                 </select>
               ) : (
-                <div className="mt-1 text-sm text-gray-500 italic p-2 border border-dashed border-gray-300 rounded-md bg-gray-50">
-                  No other workspace members available to add.
+                <div className="mt-1 rounded-md border border-dashed border-gray-300 bg-gray-50 p-2 text-sm text-gray-500 italic">
+                  Tidak ada anggota yang tersedia.
                 </div>
               )}
             </div>
 
             <div>
-              <label htmlFor="roleName" className="block text-sm font-medium text-gray-700">
-                Project Role
+              <label
+                htmlFor="roleName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Role Proyek
               </label>
               <input
                 type="text"
@@ -182,7 +188,7 @@ export function AddProjectMemberModal({
                 value={roleName}
                 onChange={(e) => setRoleName(e.target.value)}
                 placeholder="e.g. Frontend Developer, Team Lead"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm placeholder:text-gray-400"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:text-sm"
               />
             </div>
           </div>
@@ -192,14 +198,15 @@ export function AddProjectMemberModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none"
             >
               Cancel
             </button>
+
             <button
               type="submit"
               disabled={loading || candidates.length === 0}
-              className="flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+              className="flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
             >
               {loading ? "Adding..." : "Add Member"}
             </button>
