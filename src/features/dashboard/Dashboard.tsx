@@ -5,6 +5,8 @@ import { useWorkspace } from "#/contexts/WorkspaceContext";
 
 import { useEffect, useState } from "react";
 import { CreateProjectModal } from "./CreateProjectModal";
+import "@aejkatappaja/phantom-ui";
+import { Link } from "@tanstack/react-router";
 
 type MetadataProps = {
   title: string;
@@ -24,7 +26,7 @@ function MetadataCard({
   iconColor,
 }: MetadataProps) {
   return (
-    <div className="flex justify-between rounded-md border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="flex justify-between rounded-md border border-gray-200 bg-white p-4">
       <div className="space-y-1">
         <p className="font-medium text-gray-700">{title}</p>
         <p className="text-2xl font-black">{num}</p>
@@ -40,108 +42,201 @@ function MetadataCard({
 
 function ProjectOverviewCard({ projects }: { projects: any[] }) {
   return (
-    <div className="rounded-md border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-gray-100 p-4">
-        <h2 className="font-semibold text-gray-800">Project Overview</h2>
-        <a href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">View all <Icon icon="lucide:arrow-right" className="w-4 h-4" /></a>
-      </div>
-      <div className="flex flex-col">
-        {projects.map((project) => (
-          <div key={project.id} className="p-5 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-            <div className="flex items-center justify-between mb-3">
-               <div>
-                 <h3 className="font-bold text-gray-900">{project.name}</h3>
-                 <p className="text-xs text-gray-500 mt-1">{project.description || 'No description'}</p>
-               </div>
-               <div className={`px-2.5 py-1 rounded-md text-xs font-bold tracking-wide ${project.status === 'active' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'}`}>
-                 {project.status.toUpperCase()}
-               </div>
-            </div>
-            <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
-              <span className="flex items-center gap-1.5"><Icon icon="lucide:users" className="w-4 h-4" /> {project.project_members?.[0]?.count || 0} members</span>
-              <span className="flex items-center gap-1.5"><Icon icon="lucide:calendar" className="w-4 h-4" /> {new Date(project.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-            </div>
-            <div className="w-full">
-              <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-                <span>Progress</span>
-                <span>{project.progress}%</span>
+    <phantom-ui loading={false}>
+      <div className="rounded-md border border-gray-200 bg-white">
+        <div className="flex items-center justify-between border-b border-gray-100 p-4">
+          <h2 className="font-medium text-gray-800">Ringkasan Proyek</h2>
+          <Link
+            to="/projects"
+            className="group flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+          >
+            Lihat Semua{" "}
+            <Icon
+              icon="lucide:arrow-right"
+              className="aspect-square h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5"
+            />
+          </Link>
+        </div>
+        <div className="flex flex-col">
+          {projects.map((project) => (
+            <Link
+              to="/projects/$projectId"
+              params={{ projectId: project.id }}
+              key={project.id}
+              className="border-b border-gray-100 p-5 transition-colors last:border-0 hover:bg-gray-50"
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">{project.name}</h3>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {project.description || "No description"}
+                  </p>
+                </div>
+                <div
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium ${project.status === "Aktif" || project.status === "Selesai" ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-600"}`}
+                >
+                  {project.status}
+                </div>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${project.progress}%` }}></div>
+              <div className="mb-4 flex items-center gap-4 text-xs text-gray-500">
+                <span className="flex items-center gap-1.5">
+                  <Icon icon="lucide:users" className="h-4 w-4" />{" "}
+                  {project.project_members?.[0]?.count || 0} anggota
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Icon icon="lucide:calendar" className="h-4 w-4" />{" "}
+                  {new Date(project.created_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
               </div>
+              <div className="w-full">
+                <div className="mb-1.5 flex justify-between text-xs text-gray-500">
+                  <span>Progres</span>
+                  <span>{project.progress}%</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className="h-1.5 rounded-full bg-blue-500"
+                    style={{ width: `${project.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            </Link>
+          ))}
+          {projects.length === 0 && (
+            <div className="p-8 text-center text-sm text-gray-500">
+              Belum ada proyek.
             </div>
-          </div>
-        ))}
-        {projects.length === 0 && <div className="p-8 text-sm text-gray-500 text-center">No projects found.</div>}
+          )}
+        </div>
       </div>
-    </div>
+    </phantom-ui>
   );
 }
 
 function RecentActivityCard({ tasks }: { tasks: any[] }) {
   return (
-    <div className="rounded-md border border-gray-200 bg-white shadow-sm">
+    <div className="rounded-md border border-gray-200 bg-white">
       <div className="border-b border-gray-100 p-4">
         <h2 className="font-semibold text-gray-800">Recent Activity</h2>
       </div>
       <div className="flex flex-col">
         {tasks.map((task) => (
-          <div key={task.id} className="flex items-start justify-between p-5 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+          <div
+            key={task.id}
+            className="flex items-start justify-between border-b border-gray-100 p-5 transition-colors last:border-0 hover:bg-gray-50"
+          >
             <div className="flex gap-4">
-              <div className={`p-2.5 rounded-lg h-fit ${task.priority === 'high' ? 'bg-red-50 text-red-500' : task.priority === 'low' ? 'bg-emerald-50 text-emerald-500' : 'bg-orange-50 text-orange-400'}`}>
-                <Icon icon={task.priority === 'high' ? 'lucide:alert-triangle' : 'lucide:square'} className="w-5 h-5" />
+              <div
+                className={`h-fit rounded-lg p-2.5 ${task.priority === "high" ? "bg-red-50 text-red-500" : task.priority === "low" ? "bg-emerald-50 text-emerald-500" : "bg-orange-50 text-orange-400"}`}
+              >
+                <Icon
+                  icon={
+                    task.priority === "high"
+                      ? "lucide:alert-triangle"
+                      : "lucide:square"
+                  }
+                  className="h-5 w-5"
+                />
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">{task.title}</h3>
-                <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                   <span>Task</span>
                   {task.profiles && (
-                    <span className="flex items-center gap-1.5 bg-gray-100 px-2 py-0.5 rounded-full">
-                      <div className="w-4 h-4 rounded-full bg-gray-300 overflow-hidden flex items-center justify-center text-[10px] font-bold text-white">
-                        {task.profiles.avatar_url ? <img src={task.profiles.avatar_url} alt="" className="w-full h-full object-cover" /> : task.profiles.username?.charAt(0).toUpperCase()}
+                    <span className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2 py-0.5">
+                      <div className="flex h-4 w-4 items-center justify-center overflow-hidden rounded-full bg-gray-300 text-[10px] font-bold text-white">
+                        {task.profiles.avatar_url ? (
+                          <img
+                            src={task.profiles.avatar_url}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          task.profiles.username?.charAt(0).toUpperCase()
+                        )}
                       </div>
                       {task.profiles.username}
                     </span>
                   )}
-                  <span>{new Date(task.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+                  <span>
+                    {new Date(task.created_at).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className={`px-2.5 py-1 rounded-md text-xs font-bold tracking-wide ${
-              task.status === 'done' ? 'bg-emerald-100 text-emerald-600' :
-              task.status === 'in_progress' ? 'bg-yellow-100 text-yellow-600' :
-              'bg-gray-100 text-gray-600'
-            }`}>
-              {task.status.replace('_', ' ').toUpperCase()}
+            <div
+              className={`rounded-md px-2.5 py-1 text-xs font-bold tracking-wide ${
+                task.status === "done"
+                  ? "bg-emerald-100 text-emerald-600"
+                  : task.status === "in_progress"
+                    ? "bg-yellow-100 text-yellow-600"
+                    : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {task.status.replace("_", " ").toUpperCase()}
             </div>
           </div>
         ))}
-        {tasks.length === 0 && <div className="p-8 text-sm text-gray-500 text-center">No recent activity.</div>}
+        {tasks.length === 0 && (
+          <div className="p-8 text-center text-sm text-gray-500">
+            No recent activity.
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function TaskListCard({ title, icon, iconColor, count, tasks, badgeBg, badgeColor, emptyText = "No tasks" }: any) {
+function TaskListCard({
+  title,
+  icon,
+  iconColor,
+  count,
+  tasks,
+  badgeBg,
+  badgeColor,
+  emptyText = "No tasks",
+}: any) {
   return (
-    <div className="rounded-md border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white">
       <div className="flex items-center justify-between border-b border-gray-100 p-4">
         <div className="flex items-center gap-2 font-semibold text-gray-800">
-          <Icon icon={icon} className={`w-4 h-4 ${iconColor}`} />
+          <Icon icon={icon} className={`h-4 w-4 ${iconColor}`} />
           {title}
         </div>
-        <div className={`px-2 py-0.5 rounded-md text-xs font-bold ${badgeBg} ${badgeColor}`}>
+        <div
+          className={`rounded-md px-2 py-0.5 text-xs font-bold ${badgeBg} ${badgeColor}`}
+        >
           {count}
         </div>
       </div>
-      <div className="flex flex-col p-4 gap-3 flex-1">
+
+      <div className="flex flex-col gap-3 p-4">
         {tasks.length === 0 ? (
-          <div className="text-sm text-gray-400 text-center py-6 h-full flex items-center justify-center">{emptyText}</div>
+          <div className="flex items-center justify-center py-6 text-center text-sm text-gray-400">
+            {emptyText}
+          </div>
         ) : (
           tasks.map((task: any) => (
-            <div key={task.task_id} className="bg-gray-50/80 p-3 rounded-lg border border-gray-100 hover:border-gray-300 transition-colors">
-              <h3 className="font-medium text-gray-800 text-sm mb-1">{task.title}</h3>
-              <p className="text-xs text-gray-500 uppercase tracking-wide">TASK • {task.priority} Priority</p>
+            <div
+              key={task.task_id}
+              className="rounded-lg border border-gray-100 bg-gray-50/80 p-3 transition-colors hover:border-gray-300"
+            >
+              <h3 className="mb-1 text-sm font-medium text-gray-800">
+                {task.title}
+              </h3>
+              <p className="text-xs tracking-wide text-gray-500 uppercase">
+                TASK • {task.priority} Priority
+              </p>
             </div>
           ))
         )}
@@ -177,7 +272,7 @@ export default function Dashboard() {
 
       try {
         const currentWorkspaceId = activeWorkspace?.id;
-        
+
         if (!currentWorkspaceId) {
           console.log("User belum punya workspace");
           return;
@@ -201,12 +296,14 @@ export default function Dashboard() {
             .from("my_assigned_tasks")
             .select("*", { count: "exact" })
             .eq("assignee_id", user.id)
+            .eq("workspace_id", currentWorkspaceId)
             .limit(3),
 
           supabase
             .from("my_overdue_tasks")
             .select("*", { count: "exact" })
             .eq("assignee_id", user.id)
+            .eq("workspace_id", currentWorkspaceId)
             .limit(3),
 
           supabase
@@ -217,19 +314,23 @@ export default function Dashboard() {
             .limit(3),
         ]);
 
-        const projectIds = projectsData?.map(p => p.id) || [];
-        const { data: recentTasks } = projectIds.length > 0 ? await supabase
-          .from("tasks")
-          .select("*, profiles:assignee_id(username, avatar_url)")
-          .in("project_id", projectIds)
-          .order("created_at", { ascending: false })
-          .limit(5) : { data: [] };
-          
+        const projectIds = projectsData?.map((p) => p.id) || [];
+        const { data: recentTasks } =
+          projectIds.length > 0
+            ? await supabase
+                .from("tasks")
+                .select("*, profiles:assignee_id(username, avatar_url)")
+                .in("project_id", projectIds)
+                .order("created_at", { ascending: false })
+                .limit(5)
+            : { data: [] };
+
         const { data: myInProgressList } = await supabase
           .from("my_assigned_tasks")
           .select("*")
           .eq("assignee_id", user.id)
           .eq("status", "in_progress")
+          .eq("workspace_id", currentWorkspaceId)
           .limit(3);
 
         setDashboardData({
@@ -244,7 +345,7 @@ export default function Dashboard() {
           {
             title: "Total Proyek",
             num: projectStats?.total_projects ?? 0,
-            desc: "proyek di workspace",
+            desc: `proyek di ${currentWorkspaceName}`,
             icon: "lucide:folder-open",
             iconBg: "bg-blue-100",
             iconColor: "text-blue-500",
@@ -294,16 +395,18 @@ export default function Dashboard() {
           <p>Ini ringkasan aktivitas proyekmu</p>
         </div>
 
-        <button 
+        <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-white md:w-fit"
+          className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md bg-emerald-400 px-3 py-2 text-sm text-white hover:bg-emerald-500 md:w-fit"
         >
-          <Icon icon="ic:round-plus" className="" />
-          Project Baru
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+            <Icon icon="ic:round-plus" className="h-4 w-4" />
+          </span>
+          Proyek Baru
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 mb-6">
+      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {loading
           ? Array.from({ length: 4 }).map((_, index) => (
               <div
@@ -315,12 +418,12 @@ export default function Dashboard() {
       </div>
 
       {!loading && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 flex flex-col gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="flex flex-col gap-6 lg:col-span-2">
             <ProjectOverviewCard projects={dashboardData.projects} />
             <RecentActivityCard tasks={dashboardData.recentTasks} />
           </div>
-          <div className="lg:col-span-1 flex flex-col gap-6">
+          <div className="flex flex-col gap-6 lg:col-span-1">
             <TaskListCard
               title="My Tasks"
               icon="lucide:user"
@@ -360,7 +463,7 @@ export default function Dashboard() {
         workspaceId={workspaceId}
         workspaceName={currentWorkspaceName}
         onProjectCreated={() => {
-          setRefreshTrigger(prev => prev + 1);
+          setRefreshTrigger((prev) => prev + 1);
         }}
       />
     </main>
