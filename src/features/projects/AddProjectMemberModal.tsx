@@ -126,7 +126,7 @@ export function AddProjectMemberModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/50 p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-gray-900/50 p-4">
       <div className="relative w-full max-w-md rounded-xl bg-white shadow-xl">
         <form onSubmit={handleSubmit} className="p-6">
           <div className="mb-6">

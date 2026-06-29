@@ -17,7 +17,6 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
   const [availableRoles, setAvailableRoles] = useState<any[]>([]);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [editRoleName, setEditRoleName] = useState<string>("");
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [isAddingRole, setIsAddingRole] = useState(false);

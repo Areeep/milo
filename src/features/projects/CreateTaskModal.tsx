@@ -93,7 +93,7 @@ export function CreateTaskModal({
       onTaskCreated();
       onClose();
       toast.success("Tugas berhasil dibuat");
-      
+
       // Navigate to tasks page
       navigate({ to: "/projects/$projectId/tasks", params: { projectId } });
     } catch (err: any) {
@@ -106,9 +106,9 @@ export function CreateTaskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/50 p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-gray-900/50 p-4">
       <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl bg-white shadow-xl">
-        <div className="flex-shrink-0 border-b border-gray-100 p-6">
+        <div className="shrink-0 border-b border-gray-100 p-6">
           <h2 className="text-xl font-bold text-gray-900">Bikin Tugas Baru</h2>
         </div>
 
@@ -218,7 +218,7 @@ export function CreateTaskModal({
           </form>
         </div>
 
-        <div className="flex flex-shrink-0 justify-end gap-3 rounded-b-xl border-t border-gray-100 bg-gray-50/50 p-6">
+        <div className="flex shrink-0 justify-end gap-3 rounded-b-xl border-t border-gray-100 bg-gray-50/50 p-6">
           <button
             type="button"
             onClick={onClose}
