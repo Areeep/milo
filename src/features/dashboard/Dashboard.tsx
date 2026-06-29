@@ -7,6 +7,18 @@ import { useEffect, useState } from "react";
 import { CreateProjectModal } from "./CreateProjectModal";
 import "@aejkatappaja/phantom-ui";
 import { Link } from "@tanstack/react-router";
+import Badge from "#/components/ui/Badge";
+import {
+  PRIORITY,
+  PROJECT_STATUS,
+  TASK_STATUS,
+} from "../projects/constants/project";
+import type { Project } from "../projects/types/status";
+import type {
+  RecentTask,
+  Task,
+  TaskListCardProps,
+} from "../projects/types/task";
 
 type MetadataProps = {
   title: string;
@@ -40,12 +52,12 @@ function MetadataCard({
   );
 }
 
-function ProjectOverviewCard({ projects }: { projects: any[] }) {
+function ProjectOverviewCard({ projects }: { projects: Project[] }) {
   return (
     <phantom-ui loading={false}>
       <div className="rounded-md border border-gray-200 bg-white">
         <div className="flex items-center justify-between border-b border-gray-100 p-4">
-          <h2 className="font-medium text-gray-800">Ringkasan Proyek</h2>
+          <h2 className="font-semibold text-gray-800">Ringkasan Proyek</h2>
           <Link
             to="/projects"
             className="group flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
@@ -57,6 +69,7 @@ function ProjectOverviewCard({ projects }: { projects: any[] }) {
             />
           </Link>
         </div>
+
         <div className="flex flex-col">
           {projects.map((project) => (
             <Link
@@ -69,20 +82,21 @@ function ProjectOverviewCard({ projects }: { projects: any[] }) {
                 <div>
                   <h3 className="font-semibold">{project.name}</h3>
                   <p className="mt-1 text-xs text-gray-500">
-                    {project.description || "No description"}
+                    {project.description || "Belum ada deskripsi."}
                   </p>
                 </div>
-                <div
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium ${project.status === "Aktif" || project.status === "Selesai" ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-600"}`}
-                >
-                  {project.status}
-                </div>
+
+                <Badge variant={project.status}>
+                  {PROJECT_STATUS[project.status]}
+                </Badge>
               </div>
+
               <div className="mb-4 flex items-center gap-4 text-xs text-gray-500">
                 <span className="flex items-center gap-1.5">
                   <Icon icon="lucide:users" className="h-4 w-4" />{" "}
                   {project.project_members?.[0]?.count || 0} anggota
                 </span>
+
                 <span className="flex items-center gap-1.5">
                   <Icon icon="lucide:calendar" className="h-4 w-4" />{" "}
                   {new Date(project.created_at).toLocaleDateString("en-US", {
@@ -99,7 +113,7 @@ function ProjectOverviewCard({ projects }: { projects: any[] }) {
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
                   <div
-                    className="h-1.5 rounded-full bg-blue-500"
+                    className="h-1.5 rounded-full bg-emerald-500"
                     style={{ width: `${project.progress}%` }}
                   ></div>
                 </div>
@@ -117,11 +131,11 @@ function ProjectOverviewCard({ projects }: { projects: any[] }) {
   );
 }
 
-function RecentActivityCard({ tasks }: { tasks: any[] }) {
+function RecentActivityCard({ tasks }: { tasks: RecentTask[] }) {
   return (
     <div className="rounded-md border border-gray-200 bg-white">
       <div className="border-b border-gray-100 p-4">
-        <h2 className="font-semibold text-gray-800">Recent Activity</h2>
+        <h2 className="font-semibold text-gray-800">Aktifitas Terbaru</h2>
       </div>
       <div className="flex flex-col">
         {tasks.map((task) => (
@@ -137,7 +151,7 @@ function RecentActivityCard({ tasks }: { tasks: any[] }) {
                   icon={
                     task.priority === "high"
                       ? "lucide:alert-triangle"
-                      : "lucide:square"
+                      : "lucide:feather"
                   }
                   className="h-5 w-5"
                 />
@@ -173,17 +187,7 @@ function RecentActivityCard({ tasks }: { tasks: any[] }) {
                 </div>
               </div>
             </div>
-            <div
-              className={`rounded-md px-2.5 py-1 text-xs font-bold tracking-wide ${
-                task.status === "done"
-                  ? "bg-emerald-100 text-emerald-600"
-                  : task.status === "in_progress"
-                    ? "bg-yellow-100 text-yellow-600"
-                    : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {task.status.replace("_", " ").toUpperCase()}
-            </div>
+            <Badge variant={task.status}>{TASK_STATUS[task.status]}</Badge>
           </div>
         ))}
         {tasks.length === 0 && (
@@ -199,25 +203,25 @@ function RecentActivityCard({ tasks }: { tasks: any[] }) {
 function TaskListCard({
   title,
   icon,
-  iconColor,
   count,
   tasks,
   badgeBg,
   badgeColor,
-  emptyText = "No tasks",
-}: any) {
+  emptyText = "Tidak ada tugas",
+}: TaskListCardProps) {
   return (
     <div className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white">
       <div className="flex items-center justify-between border-b border-gray-100 p-4">
-        <div className="flex items-center gap-2 font-semibold text-gray-800">
-          <Icon icon={icon} className={`h-4 w-4 ${iconColor}`} />
+        <div className="flex items-center gap-2 font-semibold">
+          <Icon icon={icon} className={`h-4 w-4 ${badgeColor}`} />
           {title}
         </div>
-        <div
-          className={`rounded-md px-2 py-0.5 text-xs font-bold ${badgeBg} ${badgeColor}`}
+
+        <span
+          className={`rounded-md px-2 py-0.5 text-xs font-semibold ${badgeBg} ${badgeColor}`}
         >
           {count}
-        </div>
+        </span>
       </div>
 
       <div className="flex flex-col gap-3 p-4">
@@ -226,7 +230,7 @@ function TaskListCard({
             {emptyText}
           </div>
         ) : (
-          tasks.map((task: any) => (
+          tasks.map((task: Task) => (
             <div
               key={task.task_id}
               className="rounded-lg border border-gray-100 bg-gray-50/80 p-3 transition-colors hover:border-gray-300"
@@ -234,8 +238,8 @@ function TaskListCard({
               <h3 className="mb-1 text-sm font-medium text-gray-800">
                 {task.title}
               </h3>
-              <p className="text-xs tracking-wide text-gray-500 uppercase">
-                TASK • {task.priority} Priority
+              <p className="Capitalize text-xs tracking-wide text-gray-500">
+                Tugas • Prioritas {PRIORITY[task.priority]}
               </p>
             </div>
           ))
@@ -371,8 +375,8 @@ export default function Dashboard() {
             num: overdueTasks ?? 0,
             desc: "perlu diperhatikan",
             icon: "lucide:triangle-alert",
-            iconBg: "bg-rose-100",
-            iconColor: "text-rose-500",
+            iconBg: "bg-yellow-100",
+            iconColor: "text-yellow-500",
           },
         ]);
       } catch (error) {
@@ -397,7 +401,7 @@ export default function Dashboard() {
 
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md bg-emerald-400 px-3 py-2 text-sm text-white hover:bg-emerald-500 md:w-fit"
+          className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600 md:w-fit"
         >
           <span className="flex h-5 w-5 shrink-0 items-center justify-center">
             <Icon icon="ic:round-plus" className="h-4 w-4" />
@@ -425,33 +429,30 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-col gap-6 lg:col-span-1">
             <TaskListCard
-              title="My Tasks"
-              icon="lucide:user"
-              iconColor="text-gray-500"
+              title="Tugas Anda"
+              icon="lucide:feather"
               count={metadata[2]?.num || 0}
               tasks={dashboardData.myTasksList}
-              badgeBg="bg-emerald-100"
-              badgeColor="text-emerald-700"
+              badgeBg="bg-violet-100"
+              badgeColor="text-violet-700"
             />
             <TaskListCard
-              title="Overdue"
+              title="Terlambat"
               icon="lucide:triangle-alert"
-              iconColor="text-gray-500"
               count={metadata[3]?.num || 0}
               tasks={dashboardData.myOverdueList}
-              badgeBg="bg-rose-100"
-              badgeColor="text-rose-700"
-              emptyText="No overdue tasks"
+              badgeBg="bg-yellow-100"
+              badgeColor="text-yellow-700"
+              emptyText="Tidak ada tugas terlambat"
             />
             <TaskListCard
-              title="In Progress"
+              title="Berlangsung"
               icon="lucide:clock"
-              iconColor="text-gray-500"
               count={dashboardData.myInProgressList.length}
               tasks={dashboardData.myInProgressList}
               badgeBg="bg-blue-100"
               badgeColor="text-blue-700"
-              emptyText="No active tasks"
+              emptyText="Tidak ada tugas yang berlangsung"
             />
           </div>
         </div>

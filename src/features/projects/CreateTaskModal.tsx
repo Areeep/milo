@@ -27,9 +27,9 @@ export function CreateTaskModal({
   // Form State
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("Menengah");
+  const [priority, setPriority] = useState("medium");
   const [assigneeId, setAssigneeId] = useState("");
-  const [status, setStatus] = useState("Belum");
+  const [status, setStatus] = useState("todo");
   const [dueDate, setDueDate] = useState("");
 
   const [error, setError] = useState<string | null>(null);
@@ -85,8 +85,8 @@ export function CreateTaskModal({
       // Reset form
       setTitle("");
       setDescription("");
-      setPriority("Menengah");
-      setStatus("Belum");
+      setPriority("medium");
+      setStatus("todo");
       setAssigneeId("");
       setDueDate("");
 
@@ -163,9 +163,9 @@ export function CreateTaskModal({
                   onChange={(e) => setPriority(e.target.value)}
                   className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
                 >
-                  <option value="Rendah">Rendah</option>
-                  <option value="Menengah">Menengah</option>
-                  <option value="Tinggi">Tinggi</option>
+                  <option value="low">Rendah</option>
+                  <option value="medium">Menengah</option>
+                  <option value="high">Tinggi</option>
                 </select>
               </div>
 
@@ -196,10 +196,10 @@ export function CreateTaskModal({
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
                 >
-                  <option value="Belum">Belum</option>
-                  <option value="Dalam Proses">Dalam Proses</option>
-                  <option value="Menunggu Review">Menunggu Review</option>
-                  <option value="Selesai">Selesai</option>
+                  <option value="todo">Belum</option>
+                  <option value="in_progress">Dalam Proses</option>
+                  <option value="review">Menunggu Review</option>
+                  <option value="done">Selesai</option>
                 </select>
               </div>
 
