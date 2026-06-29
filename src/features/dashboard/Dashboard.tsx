@@ -2,10 +2,8 @@ import { supabase } from "#/lib/supabase";
 import { Route as rootRoute } from "#/routes/__root";
 import { Icon } from "@iconify/react";
 import { useWorkspace } from "#/contexts/WorkspaceContext";
-
 import { useEffect, useState } from "react";
 import { CreateProjectModal } from "./CreateProjectModal";
-import "@aejkatappaja/phantom-ui";
 import { Link } from "@tanstack/react-router";
 import Badge from "#/components/ui/Badge";
 import {
@@ -54,80 +52,79 @@ function MetadataCard({
 
 function ProjectOverviewCard({ projects }: { projects: Project[] }) {
   return (
-    <phantom-ui loading={false}>
-      <div className="rounded-md border border-gray-200 bg-white">
-        <div className="flex items-center justify-between border-b border-gray-100 p-4">
-          <h2 className="font-semibold text-gray-800">Ringkasan Proyek</h2>
-          <Link
-            to="/projects"
-            className="group flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-          >
-            Lihat Semua{" "}
-            <Icon
-              icon="lucide:arrow-right"
-              className="aspect-square h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5"
-            />
-          </Link>
-        </div>
-
-        <div className="flex flex-col">
-          {projects.map((project) => (
-            <Link
-              to="/projects/$projectId"
-              params={{ projectId: project.id }}
-              key={project.id}
-              className="border-b border-gray-100 p-5 transition-colors last:border-0 hover:bg-gray-50"
-            >
-              <div className="mb-3 flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold">{project.name}</h3>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {project.description || "Belum ada deskripsi."}
-                  </p>
-                </div>
-
-                <Badge variant={project.status}>
-                  {PROJECT_STATUS[project.status]}
-                </Badge>
-              </div>
-
-              <div className="mb-4 flex items-center gap-4 text-xs text-gray-500">
-                <span className="flex items-center gap-1.5">
-                  <Icon icon="lucide:users" className="h-4 w-4" />{" "}
-                  {project.project_members?.[0]?.count || 0} anggota
-                </span>
-
-                <span className="flex items-center gap-1.5">
-                  <Icon icon="lucide:calendar" className="h-4 w-4" />{" "}
-                  {new Date(project.created_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
-              <div className="w-full">
-                <div className="mb-1.5 flex justify-between text-xs text-gray-500">
-                  <span>Progres</span>
-                  <span>{project.progress}%</span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
-                  <div
-                    className="h-1.5 rounded-full bg-emerald-500"
-                    style={{ width: `${project.progress}%` }}
-                  ></div>
-                </div>
-              </div>
-            </Link>
-          ))}
-          {projects.length === 0 && (
-            <div className="p-8 text-center text-sm text-gray-500">
-              Belum ada proyek.
-            </div>
-          )}
-        </div>
+    <div className="rounded-md border border-gray-200 bg-white">
+      <div className="flex items-center justify-between border-b border-gray-100 p-4">
+        <h2 className="font-semibold text-gray-800">Ringkasan Proyek</h2>
+        <Link
+          to="/projects"
+          className="group flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 md:text-sm"
+        >
+          Lihat Semua{" "}
+          <Icon
+            icon="lucide:arrow-right"
+            className="aspect-square h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5"
+          />
+        </Link>
       </div>
-    </phantom-ui>
+
+      <div className="flex flex-col">
+        {projects.map((project) => (
+          <Link
+            to="/projects/$projectId"
+            params={{ projectId: project.id }}
+            key={project.id}
+            className="border-b border-gray-100 p-5 transition-colors last:border-0 hover:bg-gray-50"
+          >
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div>
+                <h3 className="font-semibold">{project.name}</h3>
+                <p className="mt-1 max-w-[20ch] truncate text-xs text-gray-500 md:max-w-none md:overflow-visible md:whitespace-normal">
+                  {project.description || "Belum ada deskripsi."}
+                </p>
+              </div>
+
+              <Badge variant={project.status}>
+                {PROJECT_STATUS[project.status]}
+              </Badge>
+            </div>
+
+            <div className="mb-4 flex items-center gap-4 text-xs text-gray-500">
+              <span className="flex items-center gap-1.5">
+                <Icon icon="lucide:users" className="h-4 w-4" />{" "}
+                {project.project_members?.[0]?.count || 0} anggota
+              </span>
+
+              <span className="flex items-center gap-1.5">
+                <Icon icon="lucide:calendar" className="h-4 w-4" />{" "}
+                {new Date(project.created_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+
+            <div className="w-full">
+              <div className="mb-1.5 flex justify-between text-xs text-gray-500">
+                <span>Progres</span>
+                <span>{project.progress}%</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+                <div
+                  className="h-1.5 rounded-full bg-emerald-500"
+                  style={{ width: `${project.progress}%` }}
+                ></div>
+              </div>
+            </div>
+          </Link>
+        ))}
+        {projects.length === 0 && (
+          <div className="p-8 text-center text-sm text-gray-500">
+            Belum ada proyek.
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -153,15 +150,18 @@ function RecentActivityCard({ tasks }: { tasks: RecentTask[] }) {
                       ? "lucide:alert-triangle"
                       : "lucide:feather"
                   }
-                  className="h-5 w-5"
+                  className="h-4 w-4"
                 />
               </div>
+
               <div>
-                <h3 className="font-medium text-gray-900">{task.title}</h3>
-                <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                  <span>Task</span>
+                <h3 className="text-sm font-medium text-gray-900 md:text-base">
+                  {task.title}
+                </h3>
+
+                <div className="mt-2 flex flex-col gap-2 text-xs text-gray-500">
                   {task.profiles && (
-                    <span className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2 py-0.5">
+                    <span className="flex w-fit items-center gap-1.5 rounded-full bg-gray-100 px-2 py-1">
                       <div className="flex h-4 w-4 items-center justify-center overflow-hidden rounded-full bg-gray-300 text-[10px] font-bold text-white">
                         {task.profiles.avatar_url ? (
                           <img
@@ -176,6 +176,14 @@ function RecentActivityCard({ tasks }: { tasks: RecentTask[] }) {
                       {task.profiles.username}
                     </span>
                   )}
+
+                  <Badge
+                    variant={task.status}
+                    className="inline-flex w-fit md:hidden"
+                  >
+                    {TASK_STATUS[task.status]}
+                  </Badge>
+
                   <span>
                     {new Date(task.created_at).toLocaleString("en-US", {
                       month: "short",
@@ -187,7 +195,10 @@ function RecentActivityCard({ tasks }: { tasks: RecentTask[] }) {
                 </div>
               </div>
             </div>
-            <Badge variant={task.status}>{TASK_STATUS[task.status]}</Badge>
+
+            <Badge variant={task.status} className="hidden md:inline-flex">
+              {TASK_STATUS[task.status]}
+            </Badge>
           </div>
         ))}
         {tasks.length === 0 && (
@@ -238,7 +249,7 @@ function TaskListCard({
               <h3 className="mb-1 text-sm font-medium text-gray-800">
                 {task.title}
               </h3>
-              <p className="Capitalize text-xs tracking-wide text-gray-500">
+              <p className="Capitalize text-xs text-gray-500">
                 Tugas • Prioritas {PRIORITY[task.priority]}
               </p>
             </div>
@@ -333,7 +344,7 @@ export default function Dashboard() {
           .from("my_assigned_tasks")
           .select("*")
           .eq("assignee_id", user.id)
-          .eq("status", "in_progress")
+          .eq("status", "in-progress")
           .eq("workspace_id", currentWorkspaceId)
           .limit(3);
 
@@ -390,7 +401,7 @@ export default function Dashboard() {
   }, [user, activeWorkspace, refreshTrigger]);
 
   return (
-    <main className="flex min-h-screen flex-col gap-8 bg-white px-5 py-10 text-black md:px-24">
+    <main className="flex min-h-screen flex-col gap-8">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold">
@@ -423,11 +434,12 @@ export default function Dashboard() {
 
       {!loading && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="flex flex-col gap-6 lg:col-span-2">
+          <div className="flex flex-col gap-6 lg:col-span-3 xl:col-span-2">
             <ProjectOverviewCard projects={dashboardData.projects} />
             <RecentActivityCard tasks={dashboardData.recentTasks} />
           </div>
-          <div className="flex flex-col gap-6 lg:col-span-1">
+
+          <div className="flex flex-col gap-6 lg:col-span-3 xl:col-span-1">
             <TaskListCard
               title="Tugas Anda"
               icon="lucide:feather"

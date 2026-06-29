@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
 import { toast } from "react-hot-toast";
+import Button from "#/components/ui/Button";
 
 type Profile = {
   id: string;
@@ -25,7 +26,7 @@ export function CreateProjectModal({
 }) {
   const [loading, setLoading] = useState(false);
   const [members, setMembers] = useState<Profile[]>([]);
-  
+
   // Form State
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
@@ -34,7 +35,9 @@ export function CreateProjectModal({
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [projectLeadId, setProjectLeadId] = useState("");
-  const [selectedTeamMemberIds, setSelectedTeamMemberIds] = useState<string[]>([]);
+  const [selectedTeamMemberIds, setSelectedTeamMemberIds] = useState<string[]>(
+    [],
+  );
 
   // Fetch workspace members when modal opens
   useEffect(() => {
@@ -43,7 +46,9 @@ export function CreateProjectModal({
     const fetchMembers = async () => {
       const { data, error } = await supabase
         .from("workspace_members")
-        .select("user_id, role, profiles!inner(id, username, email, avatar_url)")
+        .select(
+          "user_id, role, profiles!inner(id, username, email, avatar_url)",
+        )
         .eq("workspace_id", workspaceId);
 
       if (error) {
@@ -51,7 +56,7 @@ export function CreateProjectModal({
         return;
       }
 
-      const formattedMembers = (data as any[]).map(m => m.profiles);
+      const formattedMembers = (data as any[]).map((m) => m.profiles);
       setMembers(formattedMembers);
     };
 
@@ -95,13 +100,13 @@ export function CreateProjectModal({
         .select();
 
       if (rolesError) throw rolesError;
-      
-      const ownerRole = defaultRoles?.find(r => r.role_name === "Owner");
-      const anggotaRole = defaultRoles?.find(r => r.role_name === "Anggota");
+
+      const ownerRole = defaultRoles.find((r) => r.role_name === "Owner");
+      const anggotaRole = defaultRoles.find((r) => r.role_name === "Anggota");
 
       // 2. Insert into project_members
       const { data: userData } = await supabase.auth.getUser();
-      const currentUserId = userData?.user?.id;
+      const currentUserId = userData.user?.id;
 
       const allSelectedUserIds = new Set(selectedTeamMemberIds);
       if (projectLeadId) {
@@ -112,7 +117,7 @@ export function CreateProjectModal({
       }
 
       if (allSelectedUserIds.size > 0) {
-        const memberInserts = Array.from(allSelectedUserIds).map(userId => ({
+        const memberInserts = Array.from(allSelectedUserIds).map((userId) => ({
           project_id: newProjectId,
           user_id: userId,
           role_id: userId === currentUserId ? ownerRole?.id : anggotaRole?.id,
@@ -151,39 +156,48 @@ export function CreateProjectModal({
   };
 
   const toggleTeamMember = (id: string) => {
-    setSelectedTeamMemberIds(prev => 
-      prev.includes(id) ? prev.filter(memberId => memberId !== id) : [...prev, id]
+    setSelectedTeamMemberIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((memberId) => memberId !== id)
+        : [...prev, id],
     );
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-gray-900/50 p-4">
-      <div className="relative w-full max-w-xl rounded-xl bg-white shadow-xl">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-gray-900/50 p-4 sm:p-6">
+      <div className="relative flex max-h-full w-full max-w-xl flex-col rounded-xl bg-white shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 p-6 pb-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 p-6 pb-4">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Create New Project</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Bikin Proyek Baru
+            </h2>
             <p className="mt-1 text-sm text-gray-500">
-              In workspace: <span className="font-semibold text-blue-600">{workspaceName}</span>
+              Di workspace:{" "}
+              <span className="font-semibold text-emerald-600">
+                {workspaceName}
+              </span>
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md text-gray-400 hover:text-gray-600 focus:outline-none"
+            className="rounded-md text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
           >
             <Icon icon="lucide:x" className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="min-h-0 overflow-y-auto p-6 scrollbar-hide">
           <div className="space-y-5">
-            
             {/* Project Name */}
             <div>
-              <label htmlFor="projectName" className="block text-sm font-medium text-gray-700">
-                Project Name
+              <label
+                htmlFor="projectName"
+                className="block text-xs font-medium text-gray-700"
+              >
+                Nama Proyek
               </label>
               <input
                 type="text"
@@ -191,14 +205,17 @@ export function CreateProjectModal({
                 required
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                placeholder="Enter project name"
-                className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                placeholder="ex: Milo"
+                className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               />
             </div>
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="description"
+                className="block text-xs font-medium text-gray-700"
+              >
                 Description
               </label>
               <textarea
@@ -206,89 +223,104 @@ export function CreateProjectModal({
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe your project"
-                className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                placeholder="Platform manajemen proyek..."
+                className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               />
             </div>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {/* Status */}
               <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="status"
+                  className="block text-xs font-medium text-gray-700"
+                >
                   Status
                 </label>
                 <select
                   id="status"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                 >
-                  <option value="Aktif">Aktif</option>
-                  <option value="Ditunda">Ditunda</option>
-                  <option value="Selesai">Selesai</option>
-                  <option value="Dibatalkan">Dibatalkan</option>
+                  <option value="active">Aktif</option>
+                  <option value="on-hold">Ditunda</option>
+                  <option value="completed">Selesai</option>
+                  <option value="cancelled">Dibatalkan</option>
                 </select>
               </div>
 
               {/* Priority */}
               <div>
-                <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
-                  Priority
+                <label
+                  htmlFor="priority"
+                  className="block text-xs font-medium text-gray-700"
+                >
+                  Prioritas
                 </label>
                 <select
                   id="priority"
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                 >
-                  <option value="Tinggi">Tinggi</option>
-                  <option value="Menengah">Menengah</option>
-                  <option value="Rendah">Rendah</option>
+                  <option value="high">Tinggi</option>
+                  <option value="medium">Menengah</option>
+                  <option value="low">Rendah</option>
                 </select>
               </div>
 
               {/* Start Date */}
               <div>
-                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
-                  Start Date
+                <label
+                  htmlFor="startDate"
+                  className="block text-xs font-medium text-gray-700"
+                >
+                  Tanggal Mulai
                 </label>
                 <input
                   type="date"
                   id="startDate"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                 />
               </div>
 
               {/* End Date */}
               <div>
-                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-                  End Date
+                <label
+                  htmlFor="endDate"
+                  className="block text-xs font-medium text-gray-700"
+                >
+                  Tenggat
                 </label>
                 <input
                   type="date"
                   id="endDate"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                 />
               </div>
             </div>
 
             {/* Project Lead */}
             <div>
-              <label htmlFor="projectLead" className="block text-sm font-medium text-gray-700">
-                Project Lead
+              <label
+                htmlFor="projectLead"
+                className="block text-xs font-medium text-gray-700"
+              >
+                Manajer Proyek
               </label>
               <select
                 id="projectLead"
                 value={projectLeadId}
                 onChange={(e) => setProjectLeadId(e.target.value)}
-                className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               >
-                <option value="">No lead</option>
-                {members.map(member => (
+                <option value="">Tidak ada</option>
+                {members.map((member) => (
                   <option key={`lead-${member.id}`} value={member.id}>
                     {member.username} ({member.email})
                   </option>
@@ -298,31 +330,42 @@ export function CreateProjectModal({
 
             {/* Team Members */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Team Members
+              <label className="mb-1.5 block text-xs font-medium text-gray-700">
+                Anggota Tim
               </label>
-              <div className="max-h-32 overflow-y-auto rounded-md border border-gray-300 bg-white p-2">
+              <div className="max-h-32 overflow-y-auto rounded-md border border-gray-300 bg-white p-2 hover:bg-gray-50">
                 {members.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-2">No members found</p>
+                  <p className="py-2 text-center text-sm text-gray-500">
+                    Tidak ada anggota
+                  </p>
                 ) : (
                   <div className="space-y-2">
                     {members.map((member) => (
-                      <label key={`team-${member.id}`} className="flex items-center gap-3 cursor-pointer p-1 hover:bg-gray-50 rounded">
+                      <label
+                        key={`team-${member.id}`}
+                        className="flex cursor-pointer items-center gap-3 rounded p-1"
+                      >
                         <input
                           type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                           checked={selectedTeamMemberIds.includes(member.id)}
                           onChange={() => toggleTeamMember(member.id)}
                         />
                         <div className="flex items-center gap-2">
-                          <div className="h-6 w-6 overflow-hidden rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                          <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-gray-200 text-xs font-bold text-gray-600">
                             {member.avatar_url ? (
-                              <img src={member.avatar_url} alt="" className="h-full w-full object-cover" />
+                              <img
+                                src={member.avatar_url}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
                             ) : (
                               member.username.charAt(0).toUpperCase()
                             )}
                           </div>
-                          <span className="text-sm text-gray-700">{member.username}</span>
+                          <span className="text-sm text-gray-700">
+                            {member.username}
+                          </span>
                         </div>
                       </label>
                     ))}
@@ -330,26 +373,27 @@ export function CreateProjectModal({
                 )}
               </div>
             </div>
-
           </div>
 
           {/* Actions */}
           <div className="mt-8 flex items-center justify-end gap-3">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
               disabled={loading}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              Cancel
-            </button>
-            <button
+              Batal
+            </Button>
+            <Button
               type="submit"
+              variant="primary"
               disabled={loading}
-              className="flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+              className=""
             >
-              {loading ? "Creating..." : "Create Project"}
-            </button>
+              <Icon icon="ix:project-new" className="hidden h-4 w-4 md:block" />
+              {loading ? "Membuat..." : "Buat Proyek"}
+            </Button>
           </div>
         </form>
       </div>

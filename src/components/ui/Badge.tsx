@@ -6,6 +6,7 @@ type Priority = "high" | "medium" | "low";
 
 type BadgeProps = {
   variant: ProjectStatus | TaskStatus | Priority;
+  className?: string;
   children: React.ReactNode;
 };
 
@@ -25,10 +26,10 @@ const variants = {
   done: "bg-emerald-100 text-emerald-700",
 } as const;
 
-export default function Badge({ variant, children }: BadgeProps) {
+export default function Badge({ variant, children, className }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${variants[variant]}`}
+      className={`items-center rounded-md px-2.5 py-1 text-xs font-medium ${variants[variant]} ${className}`}
     >
       {children}
     </span>
