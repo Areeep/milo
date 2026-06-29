@@ -5,13 +5,18 @@ import { Link } from "@tanstack/react-router";
 import { useWorkspace } from "#/contexts/WorkspaceContext";
 import { supabase } from "#/lib/supabase";
 import { CreateProjectModal } from "../dashboard/CreateProjectModal";
+import Button from "#/components/ui/Button";
+import Badge from "#/components/ui/Badge";
+import { PROJECT_STATUS, PRIORITY } from "./constants/project";
+import type { ProjectStatus, ProjectPriority } from "./constants/project";
+import { Icon } from "@iconify/react";
 
 type Project = {
   id: string;
   name: string;
-  description: string;
-  status: string;
-  priority: string;
+  description: string | null;
+  status: ProjectStatus;
+  priority: ProjectPriority;
   progress: number;
   tasks: { count: number }[];
 };
@@ -70,58 +75,44 @@ export function Projects() {
     });
   }, [projects, search, statusFilter, priorityFilter]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Aktif":
-        return "bg-emerald-100/80 text-emerald-600";
-      case "Ditunda":
-        return "bg-amber-100/80 text-amber-600";
-      case "Selesai":
-        return "bg-blue-100/80 text-blue-600";
-      case "Dibatalkan":
-        return "bg-rose-100/80 text-rose-600";
-      default:
-        return "bg-gray-100/80 text-gray-600";
-    }
-  };
-
   return (
-    <div className="p-8">
+    <div className="">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col justify-between gap-2 md:flex-row md:items-center">
         <div>
           <h1 className="mb-1 text-2xl font-bold text-gray-900">
             Daftar Proyek
           </h1>
-          <p className="text-sm text-gray-500">
-            Manage and track your projects
-          </p>
+          <p className="text-sm text-gray-500">Kelola dan pantau proyek Anda</p>
         </div>
-        <button
+
+        <Button
+          variant="primary"
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          className=""
         >
           <Plus className="mr-2 h-4 w-4" />
           Proyek Baru
-        </button>
+        </Button>
       </div>
 
       {/* Filters */}
-      <div className="mb-8 flex gap-4">
-        <div className="relative w-80">
+      <div className="mb-8 flex flex-col-reverse gap-4 md:flex-row">
+        <div className="relative md:w-80">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search projects..."
+            placeholder="Cari proyek..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 py-2 pr-4 pl-9 text-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 py-2 pr-4 pl-9 text-sm transition-all placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
           />
         </div>
+
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="relative cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2 pr-8 text-sm text-gray-600 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+          className="relative cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2 pr-8 text-sm text-gray-600 transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
         >
           <option value="">Semua Status</option>
           <option value="Aktif">Aktif</option>
@@ -129,10 +120,11 @@ export function Projects() {
           <option value="Selesai">Selesai</option>
           <option value="Dibatalkan">Dibatalkan</option>
         </select>
+
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
-          className="relative cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2 pr-8 text-sm text-gray-600 transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+          className="relative cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2 pr-8 text-sm text-gray-600 transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
         >
           <option value="">Semua Prioritas</option>
           <option value="Tinggi">Tinggi</option>
@@ -143,11 +135,11 @@ export function Projects() {
 
       {/* Projects Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="h-48 animate-pulse rounded-xl border border-gray-100 bg-white p-5 shadow-sm"
+              className="h-48 animate-pulse rounded-xl border border-gray-100 bg-white p-5"
             >
               <div className="mb-3 h-5 w-1/2 rounded bg-gray-200"></div>
               <div className="mb-8 h-4 w-full rounded bg-gray-100"></div>
@@ -167,51 +159,57 @@ export function Projects() {
           <p>No projects found.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
           {filteredProjects.map((project) => (
             <Link
               to={"/projects/" + project.id + "/tasks"}
               key={project.id}
-              className="group flex h-full flex-col rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+              className="group flex h-full flex-col gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-xs transition-all"
             >
-              <h3 className="mb-1 text-lg font-semibold text-gray-900">
-                {project.name}
-              </h3>
-              <p className="mb-8 line-clamp-2 flex-1 text-sm text-gray-500">
-                {project.description || "No description"}
-              </p>
+              <div className="flex items-center justify-between">
+                <h3 className="mb-1 text-lg font-semibold text-gray-900">
+                  {project.name}
+                </h3>
 
-              <div className="mb-6 flex items-center justify-between">
-                <span
-                  className={`${getStatusColor(project.status)} rounded px-2.5 py-1 text-[11px] font-semibold tracking-wider uppercase`}
-                >
-                  {project.status.replace("_", " ")}
-                </span>
-                {project.priority && (
-                  <span className="text-[11px] font-medium tracking-wide text-gray-500 uppercase">
-                    {project.priority} Priority
-                  </span>
-                )}
+                <div className="flex gap-2">
+                  <Badge variant={project.status}>
+                    {PROJECT_STATUS[project.status]}
+                  </Badge>
+
+                  <Badge variant={project.priority}>
+                    {PRIORITY[project.priority]}
+                  </Badge>
+                </div>
               </div>
 
+              <p className="line-clamp-2 flex-1 text-xs text-gray-500 md:line-clamp-3 md:text-sm">
+                {project.description || "Tidak ada deskripsi"}
+              </p>
+
               <div className="space-y-2">
-                <div className="flex justify-between text-[11px] font-medium text-gray-500">
-                  <span>Progress</span>
+                <div className="flex justify-between text-xs font-medium text-gray-500">
+                  <span>Kemajuan Proyek</span>
                   <span>{project.progress || 0}%</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
                   <div
-                    className="h-full rounded-full bg-blue-600"
+                    className="h-full rounded-full bg-emerald-600"
                     style={{ width: `${project.progress || 0}%` }}
                   ></div>
                 </div>
               </div>
+
               <div className="mt-4 flex items-center justify-between border-t border-gray-50 pt-4">
                 <span className="text-xs font-medium text-gray-500">
-                  {project.tasks[0]?.count || 0} Tasks
+                  {project.tasks[0]?.count || 0} Tugas
                 </span>
-                <span className="text-xs font-medium text-blue-600 opacity-0 transition-opacity group-hover:opacity-100">
-                  View Project &rarr;
+
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                  Lihat Detail{" "}
+                  <Icon
+                    icon="formkit:arrowright"
+                    className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                  />
                 </span>
               </div>
             </Link>
