@@ -15,7 +15,26 @@ type WorkspaceContextType = {
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
 export function WorkspaceProvider({ children, workspaces }: { children: React.ReactNode, workspaces: Workspace[] }) {
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(workspaces[0]?.id || null);
+  const [activeWorkspaceId, setActiveWorkspaceIdState] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem("milo_active_workspace");
+      if (saved && workspaces.some(w => w.id === saved)) {
+        return saved;
+      }
+    }
+    return workspaces[0]?.id || null;
+  });
+
+  const setActiveWorkspaceId = (id: string | null) => {
+    setActiveWorkspaceIdState(id);
+    if (typeof window !== 'undefined') {
+      if (id) {
+        localStorage.setItem("milo_active_workspace", id);
+      } else {
+        localStorage.removeItem("milo_active_workspace");
+      }
+    }
+  };
 
   useEffect(() => {
     if (!activeWorkspaceId && workspaces.length > 0) {
