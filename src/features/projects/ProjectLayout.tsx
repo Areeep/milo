@@ -3,10 +3,59 @@ import { Link, Outlet, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Plus } from "lucide-react";
 import { supabase } from "#/lib/supabase";
 import { CreateTaskModal } from "./CreateTaskModal";
+import Button from "#/components/ui/Button";
+import Badge from "#/components/ui/Badge";
+import { PROJECT_STATUS } from "./constants/project";
+import type { ProjectStatus, ProjectPriority } from "./constants/project";
+import { Icon } from "@iconify/react";
+
+type Project = {
+  id: string;
+  name: string;
+  description: string | null;
+  status: ProjectStatus;
+  priority: ProjectPriority;
+  progress: number;
+};
+
+type MetadataCardProps = {
+  title: string;
+  value: number | string;
+  description?: string;
+  icon: string;
+  iconBg: string;
+  iconColor: string;
+  valueColor?: string;
+};
+
+function MetadataCard({
+  title,
+  value,
+  description,
+  icon,
+  iconBg,
+  iconColor,
+}: MetadataCardProps) {
+  return (
+    <div className="flex justify-between rounded-lg border border-gray-200 bg-white p-4">
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-gray-500">{title}</p>
+
+        <p className={`text-3xl font-bold`}>{value}</p>
+
+        {description && <p className="text-sm text-gray-400">{description}</p>}
+      </div>
+
+      <div className={`h-fit rounded-xl p-3 ${iconBg}`}>
+        <Icon icon={icon} className={`h-5 w-5 ${iconColor}`} />
+      </div>
+    </div>
+  );
+}
 
 export function ProjectLayout({ projectId }: { projectId: string }) {
   const router = useRouter();
-  const [project, setProject] = useState<any>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [stats, setStats] = useState({
     totalTasks: 0,
     completedTasks: 0,
@@ -49,10 +98,10 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
           .from("tasks")
           .select("*", { count: "exact", head: true })
           .eq("project_id", projectId)
-          .eq("status", "in_progress");
+          .eq("status", "in-progress");
 
         // Assuming team members might come from workspace_members if project_members is empty
-        // For simplicity, we just count project_members. 
+        // For simplicity, we just count project_members.
         const { count: teamMembers } = await supabase
           .from("project_members")
           .select("*", { count: "exact", head: true })
@@ -64,7 +113,6 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
           inProgressTasks: inProgressTasks || 0,
           teamMembers: teamMembers || 0,
         });
-
       } catch (error) {
         console.error("Error fetching project details:", error);
       } finally {
@@ -76,17 +124,20 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
   }, [projectId, refreshTrigger]);
 
   const handleTaskCreated = () => {
-    setRefreshTrigger(prev => prev + 1);
-    window.dispatchEvent(new Event('refresh-tasks'));
+    setRefreshTrigger((prev) => prev + 1);
+    window.dispatchEvent(new Event("refresh-tasks"));
   };
 
   if (loading) {
     return (
-      <div className="p-8 animate-pulse bg-[#f8fafc] min-h-full">
-        <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-        <div className="flex gap-4 mb-8">
+      <div className="min-h-full animate-pulse p-8">
+        <div className="mb-8 h-8 w-1/4 rounded bg-gray-200"></div>
+        <div className="mb-8 flex gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex-1 h-24 bg-gray-100 rounded-lg border border-gray-200"></div>
+            <div
+              key={i}
+              className="h-24 flex-1 rounded-lg border border-gray-200 bg-gray-100"
+            ></div>
           ))}
         </div>
       </div>
@@ -95,84 +146,103 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
 
   if (!project) {
     return (
-      <div className="p-8 text-center text-gray-500 bg-[#f8fafc] min-h-full">
-        Project not found.
+      <div className="min-h-full p-8 text-center text-gray-500">
+        Project tidak ditemukan.
       </div>
     );
   }
 
   const tabs = [
-    { name: "Tasks", to: `/projects/${projectId}/tasks` },
-    { name: "Calendar", to: `/projects/${projectId}/calendar` },
-    { name: "Analytics", to: `/projects/${projectId}/analytics` },
-    { name: "Settings", to: `/projects/${projectId}/settings` },
+    { name: "Tugas", to: `/projects/${projectId}/tasks` },
+    { name: "Kalendar", to: `/projects/${projectId}/calendar` },
+    { name: "Analitik", to: `/projects/${projectId}/analytics` },
+    { name: "Pengaturan", to: `/projects/${projectId}/settings` },
+  ];
+
+  const metadata = [
+    {
+      title: "Total Tugas",
+      value: stats.totalTasks,
+      description: `tugas di ${project.name}`,
+      icon: "lucide:list-todo",
+      iconBg: "bg-violet-100",
+      iconColor: "text-violet-500",
+    },
+    {
+      title: "Selesai",
+      value: stats.completedTasks,
+      description: `telah diselesaikan`,
+      valueColor: "text-emerald-600",
+      icon: "lucide:check-check",
+      iconBg: "bg-emerald-100",
+      iconColor: "text-emerald-500",
+    },
+    {
+      title: "Dalam Proses",
+      value: stats.inProgressTasks,
+      description: `sedang dikerjakan`,
+      valueColor: "text-amber-600",
+      icon: "lucide:clock-3",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-500",
+    },
+    {
+      title: "Anggota Tim",
+      description: `anggota tim di ${project.name}`,
+      value: stats.teamMembers,
+      valueColor: "text-blue-600",
+      icon: "lucide:users",
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-500",
+    },
   ];
 
   return (
-    <div className="p-8 flex flex-col h-full bg-[#f8fafc]">
+    <div className="flex flex-1 flex-col pb-8">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row md:items-center">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => router.history.back()}
-            className="text-gray-500 hover:text-gray-900 transition-colors"
+          <Link
+            to="/projects"
+            className="text-gray-500 transition-colors hover:text-gray-900"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-          <span className="bg-emerald-100 text-emerald-700 text-[11px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
-            {project.status.replace("_", " ")}
-          </span>
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+
+          <h1 className="text-2xl font-semibold">{project.name}</h1>
+
+          <Badge variant={project.status} className="">
+            {PROJECT_STATUS[project.status]}
+          </Badge>
         </div>
-        <button 
+
+        <Button
+          variant="primary"
           onClick={() => setIsTaskModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center text-sm font-medium transition-colors"
+          className="sm:w-fit"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          New Task
-        </button>
+          <Plus className="h-4 w-4" />
+          Tugas Baru
+        </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-sm font-medium text-gray-500">Total Tasks</span>
-            <span className="text-gray-400">⚡</span>
-          </div>
-          <span className="text-3xl font-bold text-gray-900">{stats.totalTasks}</span>
-        </div>
-        <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-sm font-medium text-gray-500">Completed</span>
-            <span className="text-emerald-500">⚡</span>
-          </div>
-          <span className="text-3xl font-bold text-emerald-600">{stats.completedTasks}</span>
-        </div>
-        <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-sm font-medium text-gray-500">In Progress</span>
-            <span className="text-amber-500">⚡</span>
-          </div>
-          <span className="text-3xl font-bold text-amber-600">{stats.inProgressTasks}</span>
-        </div>
-        <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-sm font-medium text-gray-500">Team Members</span>
-            <span className="text-blue-500">⚡</span>
-          </div>
-          <span className="text-3xl font-bold text-blue-600">{stats.teamMembers}</span>
-        </div>
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {metadata.map((item) => (
+          <MetadataCard key={item.title} {...item} />
+        ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-6 gap-6">
+      <div className="mb-6 flex gap-6 border-b border-gray-200">
         {tabs.map((tab) => (
           <Link
             key={tab.name}
             to={tab.to}
             className="pb-3 text-sm font-medium transition-colors"
-            activeProps={{ className: "border-b-2 border-blue-600 text-gray-900" }}
+            activeProps={{
+              className: "border-b-2 border-emerald-600 text-gray-900",
+            }}
             inactiveProps={{ className: "text-gray-500 hover:text-gray-700" }}
           >
             {tab.name}

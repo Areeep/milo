@@ -71,7 +71,7 @@ function RouteComponent() {
         />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header onMenuClick={() => setIsMobileSidebarOpen(true)} />
-          <main className="flex-1 overflow-y-auto px-5 py-10 md:px-12 lg:px-24">
+          <main className="flex flex-1 flex-col overflow-y-auto px-5 py-10 md:px-12 lg:px-24">
             <Outlet />
           </main>
         </div>

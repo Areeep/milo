@@ -4,6 +4,7 @@ import { supabase } from "#/lib/supabase";
 import { AddProjectMemberModal } from "./AddProjectMemberModal";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "@tanstack/react-router";
+import Button from "#/components/ui/Button";
 
 export function ProjectSettings({ projectId }: { projectId: string }) {
   const navigate = useNavigate();
@@ -185,28 +186,31 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
   if (!project) return null;
 
   return (
-    <div className="flex items-start gap-6 pb-24">
+    <div className="flex flex-col gap-6 pb-8 md:items-start xl:flex-row">
       {/* Left Column: Project Details */}
-      <div className="flex-1 rounded-lg border border-gray-200 bg-white p-6">
+      <div className="w-full flex-1 rounded-lg border border-gray-200 bg-white p-6">
         <h2 className="mb-6 text-xl font-semibold">Detail Proyek</h2>
+
         <form onSubmit={handleSave} className="space-y-6">
           <div className="flex flex-col gap-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
               Nama Proyek
             </label>
+
             <input
               type="text"
               required
               value={project.name || ""}
               onChange={(e) => setProject({ ...project, name: e.target.value })}
-              className="w-full rounded-md border border-gray-300 px-4 py-2 text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500"
+              className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
               Deskripsi
             </label>
+
             <textarea
               rows={4}
               value={project.description || ""}
@@ -214,13 +218,13 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
                 setProject({ ...project, description: e.target.value })
               }
               spellCheck={false}
-              className="w-full resize-none rounded-md border border-gray-300 px-4 py-2 text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500"
+              className="w-full resize-none rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
                 Status
               </label>
               <select
@@ -228,7 +232,7 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
                 onChange={(e) =>
                   setProject({ ...project, status: e.target.value })
                 }
-                className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
               >
                 <option value="Aktif">Aktif</option>
                 <option value="Selesai">Selesai</option>
@@ -238,7 +242,7 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
                 Prioritas
               </label>
               <select
@@ -246,7 +250,7 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
                 onChange={(e) =>
                   setProject({ ...project, priority: e.target.value })
                 }
-                className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
               >
                 <option value="Rendah">Rendah</option>
                 <option value="Menengah">Menengah</option>
@@ -257,7 +261,7 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
                 Tanggal Mulai
               </label>
               <div className="relative">
@@ -267,13 +271,13 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
                   onChange={(e) =>
                     setProject({ ...project, start_date: e.target.value })
                   }
-                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
                 Tenggat
               </label>
               <div className="relative">
@@ -283,14 +287,14 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
                   onChange={(e) =>
                     setProject({ ...project, deadline: e.target.value })
                   }
-                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
                 />
               </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
+            <label className="mb-2 block text-xs font-medium text-gray-700 md:text-sm">
               Progres: {project.progress || 0}%
             </label>
             <input
@@ -308,31 +312,33 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
             />
           </div>
 
-          <div className="mt-4 flex items-center justify-end gap-2 border-t border-gray-100 pt-6">
-            <button
+          <div className="mt-4 flex flex-col justify-end gap-2 border-t border-gray-100 pt-6 md:flex-row md:items-center">
+            <Button
+              variant="danger"
               type="button"
               onClick={() => setIsDeleteModalOpen(true)}
               disabled={deleting}
-              className="flex cursor-pointer items-center rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 hover:text-red-700 disabled:opacity-50"
+              className=""
             >
               <Icon icon="lucide:trash-2" className="mr-2 h-4 w-4 pb-0.5" />
               {deleting ? "Menghapus..." : "Hapus Proyek"}
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="primary"
               type="submit"
               disabled={saving}
-              className="flex cursor-pointer items-center rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-100 hover:text-emerald-700 disabled:opacity-50"
+              className=""
             >
               <Icon icon="lucide:save" className="mr-2 h-4 w-4 pb-0.5" />
               {saving ? "Menyimpan..." : "Simpan Perubahan"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
 
       {/* Right Column: Team Members */}
-      <div className="w-1/3 self-start rounded-lg border border-gray-200 bg-white p-6">
+      <div className="w-full self-start rounded-lg border border-gray-200 bg-white p-6 xl:w-1/3">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
             Anggota Tim{" "}
@@ -340,6 +346,7 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
               ({members.length})
             </span>
           </h2>
+
           <div className="flex gap-2">
             <button
               onClick={() => setIsAddRoleModalOpen(true)}
@@ -348,6 +355,7 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
             >
               <Icon icon="lucide:shield-plus" className="h-4 w-4" />
             </button>
+
             <button
               onClick={() => setIsModalOpen(true)}
               title="Tambah Anggota"
@@ -523,6 +531,7 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
               >
                 Batal
               </button>
+
               <button
                 type="button"
                 onClick={handleDelete}

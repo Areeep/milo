@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "#/lib/supabase";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "@tanstack/react-router";
+import { Icon } from "@iconify/react";
+import Button from "#/components/ui/Button";
 
 type ProjectMember = {
   id: string;
@@ -108,8 +110,15 @@ export function CreateTaskModal({
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-gray-900/50 p-4">
       <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl bg-white shadow-xl">
-        <div className="shrink-0 border-b border-gray-100 p-6">
-          <h2 className="text-xl font-bold text-gray-900">Bikin Tugas Baru</h2>
+        <div className="flex shrink-0 justify-between border-b border-gray-100 p-4 md:p-6">
+          <h2 className="text-xl font-semibold">Bikin Tugas Baru</h2>
+
+          <button
+            onClick={onClose}
+            className="cursor-pointer text-gray-400 transition-colors hover:text-gray-600"
+          >
+            <Icon icon="lucide:x" className="h-5 w-5" />
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
@@ -125,21 +134,22 @@ export function CreateTaskModal({
             className="space-y-6"
           >
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
-                Nama
+              <label className="mb-2 block text-xs font-medium">
+                Nama Tugas
               </label>
+
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Nama Tugas"
-                className="w-full rounded-md border border-gray-300 px-4 py-2 text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                placeholder="ex: Perbaiki bug login"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-emerald-500 focus:ring-emerald-500"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block text-xs font-medium">
                 Deskripsi
               </label>
               <textarea
@@ -147,7 +157,7 @@ export function CreateTaskModal({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the task"
-                className="w-full resize-none rounded-md border border-gray-300 px-4 py-2 text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                className="w-full resize-none rounded-md border border-gray-300 p-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-emerald-500 focus:ring-emerald-500"
               />
             </div>
 
@@ -155,13 +165,13 @@ export function CreateTaskModal({
               {/* Note: Type dropdown is intentionally omitted based on previous DB schema decisions */}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-xs font-medium">
                   Prioritas
                 </label>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500"
                 >
                   <option value="low">Rendah</option>
                   <option value="medium">Menengah</option>
@@ -170,13 +180,13 @@ export function CreateTaskModal({
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-xs font-medium">
                   Penanggung Jawab
                 </label>
                 <select
                   value={assigneeId}
                   onChange={(e) => setAssigneeId(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500"
                 >
                   <option value="">Belum ada</option>
                   {members.map((m) => (
@@ -188,53 +198,55 @@ export function CreateTaskModal({
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Status
-                </label>
+                <label className="mb-2 block text-xs font-medium">Status</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500"
                 >
-                  <option value="todo">Belum</option>
-                  <option value="in_progress">Dalam Proses</option>
-                  <option value="review">Menunggu Review</option>
+                  <option value="todo">To Do</option>
+                  <option value="in-progress">Berlangsung</option>
+                  <option value="review">Review</option>
                   <option value="done">Selesai</option>
                 </select>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-xs font-medium">
                   Tenggat
                 </label>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500"
                 />
               </div>
             </div>
           </form>
         </div>
 
-        <div className="flex shrink-0 justify-end gap-3 rounded-b-xl border-t border-gray-100 bg-gray-50/50 p-6">
-          <button
+        <div className="flex justify-end gap-3 p-4 md:p-6">
+          <Button
+            variant="outline"
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+            className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none"
           >
             Batal
-          </button>
-          <button
+          </Button>
+
+          <Button
+            variant="primary"
             type="submit"
             form="create-task-form"
             disabled={loading}
-            className="flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+            className="flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
           >
+            <Icon icon="carbon:task-add" className="hidden h-4 w-4 sm:block" />
             {loading ? "Membuat..." : "Bikin Tugas"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

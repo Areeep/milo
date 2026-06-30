@@ -2,15 +2,21 @@ import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
 import { toast } from "react-hot-toast";
+import Button from "#/components/ui/Button";
 
 type TaskDetailModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  task: any; 
+  task: any;
   onDelete?: (taskId: string) => void;
 };
 
-export function TaskDetailModal({ isOpen, onClose, task, onDelete }: TaskDetailModalProps) {
+export function TaskDetailModal({
+  isOpen,
+  onClose,
+  task,
+  onDelete,
+}: TaskDetailModalProps) {
   const [loading, setLoading] = useState(false);
   const [members, setMembers] = useState<any[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -40,7 +46,7 @@ export function TaskDetailModal({ isOpen, onClose, task, onDelete }: TaskDetailM
         .from("project_members")
         .select("user_id, profiles(username, avatar_url)")
         .eq("project_id", task.project_id);
-      if (!error && data) {
+      if (!error) {
         setMembers(data);
       }
     };
@@ -91,82 +97,100 @@ export function TaskDetailModal({ isOpen, onClose, task, onDelete }: TaskDetailM
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/50 p-4">
-      <div ref={modalRef} className="relative w-full max-w-2xl rounded-xl bg-white shadow-xl flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">Detail Tugas</h2>
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-gray-900/50 p-4">
+      <div
+        ref={modalRef}
+        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl bg-white shadow-xl"
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 p-4 md:p-6">
+          <h2 className="text-xl font-semibold">Detail Tugas</h2>
+
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="cursor-pointer text-gray-400 transition-colors hover:text-gray-600"
           >
-            <Icon icon="lucide:x" className="w-5 h-5" />
+            <Icon icon="lucide:x" className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1 space-y-5">
+        <div className="flex-1 space-y-5 overflow-y-auto p-6">
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Judul Tugas</label>
+            <label className="mb-2 block text-xs font-medium">
+              Judul Tugas
+            </label>
+
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             {/* Priority */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Prioritas</label>
+              <label className="mb-2 block text-xs font-semibold text-gray-700">
+                Prioritas
+              </label>
+
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               >
-                <option value="Tinggi">Tinggi</option>
-                <option value="Menengah">Menengah</option>
-                <option value="Rendah">Rendah</option>
+                <option value="high">Tinggi</option>
+                <option value="medium">Menengah</option>
+                <option value="low">Rendah</option>
               </select>
             </div>
+
             {/* Status */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+              <label className="mb-2 block text-xs font-semibold text-gray-700">
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               >
                 <option value="todo">To Do</option>
-                <option value="in_progress">In Progress</option>
+                <option value="in-progress">Berlangsung</option>
                 <option value="review">Review</option>
-                <option value="done">Done</option>
+                <option value="done">Selesai</option>
               </select>
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Deskripsi</label>
+            <label className="mb-2 block text-xs font-semibold text-gray-700">
+              Deskripsi
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               placeholder="Deskripsi tugas..."
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             {/* Assignee */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Assignee</label>
+              <label className="mb-2 block text-xs font-semibold text-gray-700">
+                Anggota
+              </label>
+
               <select
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               >
-                <option value="">-- Pilih Assignee --</option>
+                <option value="">-- Pilih Anggota --</option>
                 {members.map((m) => (
                   <option key={m.user_id} value={m.user_id}>
                     {m.profiles?.username}
@@ -174,42 +198,47 @@ export function TaskDetailModal({ isOpen, onClose, task, onDelete }: TaskDetailM
                 ))}
               </select>
             </div>
+
             {/* Due Date */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Due Date</label>
+              <label className="mb-2 block text-xs font-semibold text-gray-700">
+                Tenggat
+              </label>
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               />
             </div>
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-100 flex-shrink-0 flex justify-between bg-gray-50/50 rounded-b-xl">
+        <div className="flex flex-col justify-end gap-2 p-6 md:flex-row">
           {onDelete ? (
-            <button
+            <Button
+              variant="danger"
               onClick={() => {
                 onDelete(task.id);
                 onClose();
               }}
-              className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
+              className=""
             >
-              <Icon icon="lucide:trash-2" className="w-4 h-4" />
+              <Icon icon="lucide:trash-2" className="h-4 w-4" />
               Hapus Tugas
-            </button>
+            </Button>
           ) : (
             <div></div>
           )}
-          <button
+          <Button
+            variant="primary"
             onClick={handleSave}
             disabled={loading}
-            className="flex items-center gap-2 rounded-md bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            className=""
           >
-            <Icon icon="lucide:save" className="w-4 h-4" />
+            <Icon icon="lucide:save" className="h-4 w-4" />
             {loading ? "Menyimpan..." : "Simpan"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

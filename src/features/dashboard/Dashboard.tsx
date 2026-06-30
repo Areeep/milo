@@ -401,7 +401,7 @@ export default function Dashboard() {
   }, [user, activeWorkspace, refreshTrigger]);
 
   return (
-    <main className="flex min-h-screen flex-col gap-8">
+    <main className="flex flex-1 flex-col gap-8">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold">
