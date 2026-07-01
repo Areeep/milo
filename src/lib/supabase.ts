@@ -1,4 +1,7 @@
-import { createBrowserClient } from '@supabase/ssr'
-import { env } from './env'
+import { createBrowserClient } from "@supabase/ssr";
+import { env } from "./env";
 
-export const supabase = createBrowserClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY)
+export const supabase = createBrowserClient(
+  env.SUPABASE_URL,
+  env.SUPABASE_ANON_KEY,
+);

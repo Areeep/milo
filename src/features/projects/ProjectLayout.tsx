@@ -3,11 +3,12 @@ import { Link, Outlet, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Plus } from "lucide-react";
 import { supabase } from "#/lib/supabase";
 import { CreateTaskModal } from "./CreateTaskModal";
-import Button from "#/components/ui/Button";
+import { Button } from "#/components/ui/button";
 import Badge from "#/components/ui/Badge";
 import { PROJECT_STATUS } from "./constants/project";
 import type { ProjectStatus, ProjectPriority } from "./constants/project";
 import { Icon } from "@iconify/react";
+import { Card, CardContent } from "#/components/ui/card";
 
 type Project = {
   id: string;
@@ -37,19 +38,20 @@ function MetadataCard({
   iconColor,
 }: MetadataCardProps) {
   return (
-    <div className="flex justify-between rounded-lg border border-gray-200 bg-white p-4">
-      <div className="space-y-1">
-        <p className="text-sm font-medium text-gray-500">{title}</p>
-
-        <p className={`text-3xl font-bold`}>{value}</p>
-
-        {description && <p className="text-sm text-gray-400">{description}</p>}
-      </div>
-
-      <div className={`h-fit rounded-xl p-3 ${iconBg}`}>
-        <Icon icon={icon} className={`h-5 w-5 ${iconColor}`} />
-      </div>
-    </div>
+    <Card>
+      <CardContent className="flex justify-between p-4">
+        <div className="space-y-1">
+          <p className="text-muted-foreground text-sm font-medium">{title}</p>
+          <p className="text-3xl font-bold">{value}</p>
+          {description && (
+            <p className="text-muted-foreground text-sm">{description}</p>
+          )}
+        </div>
+        <div className={`h-fit rounded-xl p-3 ${iconBg}`}>
+          <Icon icon={icon} className={`h-5 w-5 ${iconColor}`} />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -100,8 +102,6 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
           .eq("project_id", projectId)
           .eq("status", "in-progress");
 
-        // Assuming team members might come from workspace_members if project_members is empty
-        // For simplicity, we just count project_members.
         const { count: teamMembers } = await supabase
           .from("project_members")
           .select("*", { count: "exact", head: true })
@@ -130,23 +130,25 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-full animate-pulse p-8">
-        <div className="mb-8 h-8 w-1/4 rounded bg-gray-200"></div>
-        <div className="mb-8 flex gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-24 flex-1 rounded-lg border border-gray-200 bg-gray-100"
-            ></div>
-          ))}
-        </div>
+      <div className="min-h-full p-8">
+        <phantom-ui loading={true}>
+          <div className="bg-muted mb-8 h-8 w-1/4 rounded" />
+          <div className="mb-8 flex gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="border-border bg-card h-24 flex-1 rounded-lg border"
+              />
+            ))}
+          </div>
+        </phantom-ui>
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-full p-8 text-center text-gray-500">
+      <div className="text-muted-foreground min-h-full p-8 text-center">
         Project tidak ditemukan.
       </div>
     );
@@ -172,10 +174,10 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
       title: "Selesai",
       value: stats.completedTasks,
       description: `telah diselesaikan`,
-      valueColor: "text-emerald-600",
+      valueColor: "text-emerald-400",
       icon: "lucide:check-check",
-      iconBg: "bg-emerald-100",
-      iconColor: "text-emerald-500",
+      iconBg: "bg-emerald-500/20",
+      iconColor: "text-emerald-400",
     },
     {
       title: "Dalam Proses",
@@ -204,23 +206,19 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
         <div className="flex items-center gap-4">
           <Link
             to="/projects"
-            className="text-gray-500 transition-colors hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
 
           <h1 className="text-2xl font-semibold">{project.name}</h1>
 
-          <Badge variant={project.status} className="">
+          <Badge variant={project.status}>
             {PROJECT_STATUS[project.status]}
           </Badge>
         </div>
 
-        <Button
-          variant="primary"
-          onClick={() => setIsTaskModalOpen(true)}
-          className="sm:w-fit"
-        >
+        <Button onClick={() => setIsTaskModalOpen(true)} className="sm:w-fit">
           <Plus className="h-4 w-4" />
           Tugas Baru
         </Button>
@@ -234,16 +232,18 @@ export function ProjectLayout({ projectId }: { projectId: string }) {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-6 border-b border-gray-200">
+      <div className="border-border mb-6 flex gap-6 border-b">
         {tabs.map((tab) => (
           <Link
             key={tab.name}
             to={tab.to}
             className="pb-3 text-sm font-medium transition-colors"
             activeProps={{
-              className: "border-b-2 border-emerald-600 text-gray-900",
+              className: "border-b-2 border-primary text-foreground",
             }}
-            inactiveProps={{ className: "text-gray-500 hover:text-gray-700" }}
+            inactiveProps={{
+              className: "text-muted-foreground hover:text-foreground",
+            }}
           >
             {tab.name}
           </Link>

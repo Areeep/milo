@@ -30,7 +30,7 @@ function AuthLayout() {
           </div>
 
           <div className="max-w-md">
-            <p className="text-sm font-semibold text-emerald-700">
+            <p className="text-sm font-semibold text-primary">
               Project workspace
             </p>
             <h2 className="mt-3 text-4xl font-bold tracking-normal">
@@ -53,7 +53,7 @@ function AuthLayout() {
                 className="flex items-center gap-3 text-slate-700"
               >
                 <CheckCircle2
-                  className="h-5 w-5 text-emerald-600"
+                  className="h-5 w-5 text-primary"
                   aria-hidden
                 />
                 <span>{item}</span>

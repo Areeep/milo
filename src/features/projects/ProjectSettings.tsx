@@ -4,7 +4,24 @@ import { supabase } from "#/lib/supabase";
 import { AddProjectMemberModal } from "./AddProjectMemberModal";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "@tanstack/react-router";
-import Button from "#/components/ui/Button";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
+import { Label } from "#/components/ui/label";
+import { Textarea } from "#/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "#/components/ui/dialog";
 
 export function ProjectSettings({ projectId }: { projectId: string }) {
   const navigate = useNavigate();
@@ -13,11 +30,14 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const [availableRoles, setAvailableRoles] = useState<any[]>([]);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [editRoleName, setEditRoleName] = useState<string>("");
+
   const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [isAddingRole, setIsAddingRole] = useState(false);
@@ -47,7 +67,7 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
 
       if (membersError) throw membersError;
 
-      // 3. Fetch Available Roles (khusus untuk proyek ini)
+      // 3. Fetch Available Roles
       const { data: rolesData, error: rolesError } = await supabase
         .from("project_roles")
         .select("*")
@@ -177,9 +197,12 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
 
   if (loading) {
     return (
-      <div className="animate-pulse p-8 text-gray-500">
-        Memuat Pengaturan...
-      </div>
+      <phantom-ui loading={true} count={1} count-gap={0}>
+        <div className="flex flex-col gap-6 pb-8 md:items-start xl:flex-row">
+          <div className="border-border bg-card h-[500px] w-full flex-1 rounded-lg border p-6" />
+          <div className="border-border bg-card h-[400px] w-full self-start rounded-lg border p-6 xl:w-1/3" />
+        </div>
+      </phantom-ui>
     );
   }
 
@@ -188,115 +211,98 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
   return (
     <div className="flex flex-col gap-6 pb-8 md:items-start xl:flex-row">
       {/* Left Column: Project Details */}
-      <div className="w-full flex-1 rounded-lg border border-gray-200 bg-white p-6">
+      <div className="border-border bg-card w-full flex-1 rounded-lg border p-6 shadow-sm">
         <h2 className="mb-6 text-xl font-semibold">Detail Proyek</h2>
 
         <form onSubmit={handleSave} className="space-y-6">
-          <div className="flex flex-col gap-1">
-            <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
-              Nama Proyek
-            </label>
-
-            <input
+          <div className="space-y-1.5">
+            <Label>Nama Proyek</Label>
+            <Input
               type="text"
               required
               value={project.name || ""}
               onChange={(e) => setProject({ ...project, name: e.target.value })}
-              className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
-              Deskripsi
-            </label>
-
-            <textarea
+          <div className="space-y-1.5">
+            <Label>Deskripsi</Label>
+            <Textarea
               rows={4}
               value={project.description || ""}
               onChange={(e) =>
                 setProject({ ...project, description: e.target.value })
               }
               spellCheck={false}
-              className="w-full resize-none rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
-                Status
-              </label>
-              <select
-                value={project.status || "Aktif"}
-                onChange={(e) =>
-                  setProject({ ...project, status: e.target.value })
-                }
-                className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <Select
+                value={project.status || "active"}
+                onValueChange={(val) => setProject({ ...project, status: val })}
               >
-                <option value="Aktif">Aktif</option>
-                <option value="Selesai">Selesai</option>
-                <option value="Ditunda">Ditunda</option>
-                <option value="Dibatalkan">Dibatalkan</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Aktif</SelectItem>
+                  <SelectItem value="completed">Selesai</SelectItem>
+                  <SelectItem value="on-hold">Ditunda</SelectItem>
+                  <SelectItem value="cancelled">Dibatalkan</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
-                Prioritas
-              </label>
-              <select
-                value={project.priority || "Menengah"}
-                onChange={(e) =>
-                  setProject({ ...project, priority: e.target.value })
+            <div className="space-y-1.5">
+              <Label>Prioritas</Label>
+              <Select
+                value={project.priority || "medium"}
+                onValueChange={(val) =>
+                  setProject({ ...project, priority: val })
                 }
-                className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
               >
-                <option value="Rendah">Rendah</option>
-                <option value="Menengah">Menengah</option>
-                <option value="Tinggi">Tinggi</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Rendah</SelectItem>
+                  <SelectItem value="medium">Menengah</SelectItem>
+                  <SelectItem value="high">Tinggi</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Tanggal Mulai</Label>
+              <Input
+                type="date"
+                value={project.start_date || ""}
+                onChange={(e) =>
+                  setProject({ ...project, start_date: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Tenggat</Label>
+              <Input
+                type="date"
+                value={project.deadline || ""}
+                onChange={(e) =>
+                  setProject({ ...project, deadline: e.target.value })
+                }
+              />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
-                Tanggal Mulai
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={project.start_date || ""}
-                  onChange={(e) =>
-                    setProject({ ...project, start_date: e.target.value })
-                  }
-                  className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="mb-1 block text-xs font-medium text-gray-700 md:text-sm">
-                Tenggat
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={project.deadline || ""}
-                  onChange={(e) =>
-                    setProject({ ...project, deadline: e.target.value })
-                  }
-                  className="w-full rounded-md border border-gray-300 p-2 text-sm outline-none focus:border-emerald-500 focus:ring-emerald-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-xs font-medium text-gray-700 md:text-sm">
-              Progres: {project.progress || 0}%
-            </label>
+          <div className="space-y-2 pt-2">
+            <Label className="text-muted-foreground flex justify-between">
+              <span>Kemajuan Proyek</span>
+              <span>{project.progress || 0}%</span>
+            </Label>
             <input
               type="range"
               min="0"
@@ -306,31 +312,28 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
                 setProject({ ...project, progress: parseInt(e.target.value) })
               }
               style={{
-                background: `linear-gradient(to right, oklch(69.6% 0.17 162.48) ${project.progress || 0}%, #e5e7eb ${project.progress || 0}%)`,
+                background: `linear-gradient(to right, oklch(0.623 0.214 259.815) ${
+                  project.progress || 0
+                }%, var(--muted) ${project.progress || 0}%)`,
               }}
-              className="h-2 w-full cursor-pointer appearance-none rounded-lg accent-emerald-400"
+              className="accent-primary h-2 w-full cursor-pointer appearance-none rounded-lg"
             />
           </div>
 
-          <div className="mt-4 flex flex-col justify-end gap-2 border-t border-gray-100 pt-6 md:flex-row md:items-center">
+          <div className="border-border mt-4 flex flex-col justify-end gap-3 border-t pt-6 sm:flex-row sm:items-center">
             <Button
-              variant="danger"
+              variant="destructive"
               type="button"
               onClick={() => setIsDeleteModalOpen(true)}
               disabled={deleting}
-              className=""
+              className="sm:mr-auto"
             >
-              <Icon icon="lucide:trash-2" className="mr-2 h-4 w-4 pb-0.5" />
+              <Icon icon="lucide:trash-2" className="mr-2 h-4 w-4" />
               {deleting ? "Menghapus..." : "Hapus Proyek"}
             </Button>
 
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={saving}
-              className=""
-            >
-              <Icon icon="lucide:save" className="mr-2 h-4 w-4 pb-0.5" />
+            <Button type="submit" disabled={saving}>
+              <Icon icon="lucide:save" className="mr-2 h-4 w-4" />
               {saving ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
           </div>
@@ -338,80 +341,85 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
       </div>
 
       {/* Right Column: Team Members */}
-      <div className="w-full self-start rounded-lg border border-gray-200 bg-white p-6 xl:w-1/3">
+      <div className="border-border bg-card w-full self-start rounded-lg border p-6 shadow-sm xl:w-1/3">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
             Anggota Tim{" "}
-            <span className="text-lg font-normal text-gray-500">
+            <span className="text-muted-foreground font-normal">
               ({members.length})
             </span>
           </h2>
 
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => setIsAddRoleModalOpen(true)}
               title="Tambah Role Baru"
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-gray-200 text-gray-600 transition-colors hover:bg-gray-50"
             >
               <Icon icon="lucide:shield-plus" className="h-4 w-4" />
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => setIsModalOpen(true)}
               title="Tambah Anggota"
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-gray-200 text-gray-600 transition-colors hover:bg-gray-50"
             >
               <Icon icon="lucide:plus" className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
         {members.length === 0 ? (
-          <p className="py-4 text-center text-sm text-gray-500">
+          <p className="text-muted-foreground py-4 text-center text-sm">
             Belum ada anggota.
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {members.map((member, i) =>
               editingMemberId === member.id ? (
                 <div
                   key={i}
-                  className="flex items-center gap-2 border-b border-gray-50 py-2 last:border-0"
+                  className="border-border flex items-center gap-2 border-b py-2 last:border-0"
                 >
-                  <input
+                  <Input
                     type="text"
                     value={member.username}
                     disabled
-                    className="w-1/2 rounded-md border border-gray-300 bg-gray-50 px-2 py-1.5 text-sm text-gray-500"
+                    className="bg-muted h-9 w-1/2 text-sm"
                   />
-                  <select
-                    value={editRoleName}
-                    onChange={(e) => setEditRoleName(e.target.value)}
-                    className="w-1/2 rounded-md border border-gray-300 px-2 py-1.5 text-sm text-gray-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                  >
-                    <option value="" disabled>
-                      Pilih role...
-                    </option>
-                    {availableRoles.map((role) => (
-                      <option key={role.id} value={role.id}>
-                        {role.role_name}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => saveMemberRole(member.id)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100 hover:text-emerald-700"
-                    title="Simpan"
-                  >
-                    <Icon icon="lucide:check" className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setEditingMemberId(null)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md bg-red-50 text-red-600 transition-colors hover:bg-red-100 hover:text-red-700"
-                    title="Batal"
-                  >
-                    <Icon icon="lucide:x" className="h-4 w-4" />
-                  </button>
+                  <Select value={editRoleName} onValueChange={(val) => val && setEditRoleName(val)}>
+                    <SelectTrigger className="h-9 w-1/2 text-sm">
+                      <SelectValue placeholder="Pilih role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableRoles.map((role) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.role_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => saveMemberRole(member.id)}
+                      className="h-8 w-8 text-white hover:bg-primary/20 hover:text-white"
+                    >
+                      <Icon icon="lucide:check" className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => setEditingMemberId(null)}
+                      className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                    >
+                      <Icon icon="lucide:x" className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div
@@ -420,18 +428,18 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
                     setEditingMemberId(member.id);
                     setEditRoleName(member.role_id || "");
                   }}
-                  className="flex cursor-pointer items-center justify-between rounded-md border-b border-gray-50 p-2 transition-colors last:border-0 hover:bg-gray-50"
+                  className="hover:bg-muted flex cursor-pointer items-center justify-between rounded-md p-2 transition-colors"
                 >
-                  <span className="truncate pr-4 text-sm font-medium text-gray-700">
+                  <span className="truncate pr-4 text-sm font-medium">
                     {member.username}
                   </span>
                   <div className="flex items-center gap-3">
-                    <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-semibold whitespace-nowrap text-gray-600">
+                    <span className="bg-muted text-muted-foreground rounded px-2 py-1 text-xs font-semibold">
                       {member.role}
                     </span>
                     <Icon
                       icon="lucide:edit-3"
-                      className="h-3.5 w-3.5 text-gray-400"
+                      className="text-muted-foreground h-3.5 w-3.5"
                     />
                   </div>
                 </div>
@@ -453,97 +461,80 @@ export function ProjectSettings({ projectId }: { projectId: string }) {
       />
 
       {/* Add Role Modal */}
-      {isAddRoleModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-900">
-                Tambah Role Baru
-              </h3>
-              <button
-                onClick={() => setIsAddRoleModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <Icon icon="lucide:x" className="h-5 w-5" />
-              </button>
+      <Dialog open={isAddRoleModalOpen} onOpenChange={setIsAddRoleModalOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Tambah Role Baru</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddRole} className="space-y-6">
+            <div className="space-y-1.5">
+              <Label>Nama Role</Label>
+              <Input
+                type="text"
+                required
+                autoFocus
+                placeholder="Contoh: Designer, QA..."
+                value={newRoleName}
+                onChange={(e) => setNewRoleName(e.target.value)}
+              />
             </div>
-            <form onSubmit={handleAddRole}>
-              <div className="mb-6">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Nama Role
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoFocus
-                  placeholder="Contoh: Designer, QA..."
-                  value={newRoleName}
-                  onChange={(e) => setNewRoleName(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-4 py-2 text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500"
-                />
-              </div>
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsAddRoleModalOpen(false)}
-                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                  disabled={isAddingRole}
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isAddingRole || !newRoleName.trim()}
-                  className="flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
-                >
-                  {isAddingRole ? "Menyimpan..." : "Simpan Role"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
-                <Icon icon="lucide:alert-triangle" className="h-5 w-5" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900">Hapus Proyek</h3>
-            </div>
-            <p className="mb-6 text-sm text-gray-500">
-              Apakah Anda yakin ingin menghapus proyek{" "}
-              <span className="font-semibold text-gray-700">
-                {project.name}
-              </span>
-              ? Semua data terkait seperti tugas dan anggota akan ikut terhapus
-              secara permanen. Tindakan ini tidak dapat dibatalkan.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
                 type="button"
-                onClick={() => setIsDeleteModalOpen(false)}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                disabled={deleting}
+                variant="outline"
+                onClick={() => setIsAddRoleModalOpen(false)}
+                disabled={isAddingRole}
               >
                 Batal
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              </Button>
+              <Button
+                type="submit"
+                disabled={isAddingRole || !newRoleName.trim()}
               >
-                {deleting ? "Menghapus..." : "Ya, Hapus Proyek"}
-              </button>
+                {isAddingRole ? "Menyimpan..." : "Simpan Role"}
+              </Button>
             </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="bg-destructive/10 text-destructive flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                <Icon icon="lucide:alert-triangle" className="h-5 w-5" />
+              </div>
+              Hapus Proyek
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-base">
+              Apakah Anda yakin ingin menghapus proyek{" "}
+              <strong className="text-foreground">{project.name}</strong>? Semua
+              data terkait seperti tugas dan anggota akan ikut terhapus secara
+              permanen. Tindakan ini tidak dapat dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="border-border mt-2 flex justify-end gap-3 border-t pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+              disabled={deleting}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Menghapus..." : "Ya, Hapus Proyek"}
+            </Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

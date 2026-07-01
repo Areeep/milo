@@ -3,6 +3,7 @@ import {
   Outlet,
   redirect,
   useRouter,
+  useLocation,
 } from "@tanstack/react-router";
 import { Sidebar } from "#/components/layout/Sidebar";
 import { Header } from "#/components/layout/Header";
@@ -35,6 +36,11 @@ function RouteComponent() {
   const { auth } = Route.useRouteContext();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const router = useRouter();
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!auth.user) return;
@@ -63,7 +69,7 @@ function RouteComponent() {
 
   return (
     <WorkspaceProvider workspaces={workspaces}>
-      <div className="relative flex h-screen w-full overflow-hidden bg-white">
+      <div className="bg-background text-foreground relative flex h-screen w-full overflow-hidden">
         <Sidebar
           workspaces={workspaces}
           isOpen={isMobileSidebarOpen}

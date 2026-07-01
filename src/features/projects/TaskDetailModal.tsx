@@ -1,8 +1,24 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
 import { toast } from "react-hot-toast";
-import Button from "#/components/ui/Button";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
+import { Label } from "#/components/ui/label";
+import { Textarea } from "#/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "#/components/ui/dialog";
 
 type TaskDetailModalProps = {
   isOpen: boolean;
@@ -19,7 +35,6 @@ export function TaskDetailModal({
 }: TaskDetailModalProps) {
   const [loading, setLoading] = useState(false);
   const [members, setMembers] = useState<any[]>([]);
-  const modalRef = useRef<HTMLDivElement>(null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -32,7 +47,7 @@ export function TaskDetailModal({
     if (task) {
       setTitle(task.title || "");
       setDescription(task.description || "");
-      setPriority(task.priority || "Menengah");
+      setPriority(task.priority || "medium");
       setStatus(task.status || "todo");
       setAssigneeId(task.assignee_id || "");
       setDueDate(task.due_date ? task.due_date.split("T")[0] : "");
@@ -53,23 +68,10 @@ export function TaskDetailModal({
     fetchMembers();
   }, [isOpen, task?.project_id]);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
   if (!isOpen || !task) return null;
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     try {
       const { error } = await supabase
@@ -97,150 +99,113 @@ export function TaskDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-gray-900/50 p-4">
-      <div
-        ref={modalRef}
-        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl bg-white shadow-xl"
-      >
-        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 p-4 md:p-6">
-          <h2 className="text-xl font-semibold">Detail Tugas</h2>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Detail Tugas</DialogTitle>
+        </DialogHeader>
 
-          <button
-            onClick={onClose}
-            className="cursor-pointer text-gray-400 transition-colors hover:text-gray-600"
-          >
-            <Icon icon="lucide:x" className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 space-y-5 overflow-y-auto p-6">
-          {/* Title */}
-          <div>
-            <label className="mb-2 block text-xs font-medium">
-              Judul Tugas
-            </label>
-
-            <input
-              type="text"
+        <form onSubmit={handleSave} className="space-y-6">
+          <div className="space-y-1.5">
+            <Label>Judul Tugas</Label>
+            <Input
+              required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+              placeholder="Judul Tugas..."
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Priority */}
-            <div>
-              <label className="mb-2 block text-xs font-semibold text-gray-700">
-                Prioritas
-              </label>
-
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-              >
-                <option value="high">Tinggi</option>
-                <option value="medium">Menengah</option>
-                <option value="low">Rendah</option>
-              </select>
+            <div className="space-y-1.5">
+              <Label>Prioritas</Label>
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">Tinggi</SelectItem>
+                  <SelectItem value="medium">Menengah</SelectItem>
+                  <SelectItem value="low">Rendah</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Status */}
-            <div>
-              <label className="mb-2 block text-xs font-semibold text-gray-700">
-                Status
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-              >
-                <option value="todo">To Do</option>
-                <option value="in-progress">Berlangsung</option>
-                <option value="review">Review</option>
-                <option value="done">Selesai</option>
-              </select>
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todo">To Do</SelectItem>
+                  <SelectItem value="in-progress">Berlangsung</SelectItem>
+                  <SelectItem value="review">Review</SelectItem>
+                  <SelectItem value="done">Selesai</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="mb-2 block text-xs font-semibold text-gray-700">
-              Deskripsi
-            </label>
-            <textarea
+          <div className="space-y-1.5">
+            <Label>Deskripsi</Label>
+            <Textarea
+              rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               placeholder="Deskripsi tugas..."
             />
           </div>
 
-          <div className="flex flex-col gap-4 md:flex-row">
-            {/* Assignee */}
-            <div>
-              <label className="mb-2 block text-xs font-semibold text-gray-700">
-                Anggota
-              </label>
-
-              <select
-                value={assigneeId}
-                onChange={(e) => setAssigneeId(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-              >
-                <option value="">-- Pilih Anggota --</option>
-                {members.map((m) => (
-                  <option key={m.user_id} value={m.user_id}>
-                    {m.profiles?.username}
-                  </option>
-                ))}
-              </select>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Anggota</Label>
+              <Select value={assigneeId} onValueChange={setAssigneeId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Belum ada" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Belum ada</SelectItem>
+                  {members.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>
+                      {m.profiles?.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Due Date */}
-            <div>
-              <label className="mb-2 block text-xs font-semibold text-gray-700">
-                Tenggat
-              </label>
-              <input
+            <div className="space-y-1.5">
+              <Label>Tenggat</Label>
+              <Input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-md border border-gray-300 p-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
               />
             </div>
           </div>
-        </div>
 
-        <div className="flex flex-col justify-end gap-2 p-6 md:flex-row">
-          {onDelete ? (
-            <Button
-              variant="danger"
-              onClick={() => {
-                onDelete(task.id);
-                onClose();
-              }}
-              className=""
-            >
-              <Icon icon="lucide:trash-2" className="h-4 w-4" />
-              Hapus Tugas
+          <div className="flex flex-col justify-end gap-2 pt-2 sm:flex-row sm:items-center">
+            {onDelete && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => {
+                  onDelete(task.id);
+                  onClose();
+                }}
+              >
+                <Icon icon="lucide:trash-2" className="mr-2 h-4 w-4" />
+                Hapus Tugas
+              </Button>
+            )}
+            <Button type="submit" disabled={loading}>
+              <Icon icon="lucide:save" className="mr-2 h-4 w-4" />
+              {loading ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
-          ) : (
-            <div></div>
-          )}
-          <Button
-            variant="primary"
-            onClick={handleSave}
-            disabled={loading}
-            className=""
-          >
-            <Icon icon="lucide:save" className="h-4 w-4" />
-            {loading ? "Menyimpan..." : "Simpan"}
-          </Button>
-        </div>
-      </div>
-    </div>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

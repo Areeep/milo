@@ -25,7 +25,9 @@ export const getServerSession = createServerFn({ method: "GET" }).handler(
       },
     );
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     const { data } = await supabase.auth.getSession();
     const session = data.session;
 
@@ -71,14 +73,16 @@ export const getServerWorkspaces = createServerFn({ method: "GET" })
 
     const { data: memberWorkspaces } = await supabase
       .from("workspace_members")
-      .select(`
+      .select(
+        `
         workspace_id,
         workspaces (
           id,
           name,
           avatar_url
         )
-      `)
+      `,
+      )
       .eq("user_id", userId);
 
     return (

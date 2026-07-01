@@ -17,6 +17,8 @@ import type {
   Task,
   TaskListCardProps,
 } from "../projects/types/task";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 
 type MetadataProps = {
   title: string;
@@ -36,28 +38,31 @@ function MetadataCard({
   iconColor,
 }: MetadataProps) {
   return (
-    <div className="flex justify-between rounded-md border border-gray-200 bg-white p-4">
-      <div className="space-y-1">
-        <p className="font-medium text-gray-700">{title}</p>
-        <p className="text-2xl font-black">{num}</p>
-        <p className="text-sm text-gray-400">{desc}</p>
-      </div>
-
-      <div className={`h-fit rounded-xl p-3 ${iconBg}`}>
-        <Icon icon={icon} className={`${iconColor} h-5 w-5`} />
-      </div>
-    </div>
+    <Card>
+      <CardContent className="flex justify-between p-4">
+        <div className="space-y-1">
+          <p className="text-muted-foreground font-medium">{title}</p>
+          <p className="text-2xl font-black">{num}</p>
+          <p className="text-muted-foreground text-sm">{desc}</p>
+        </div>
+        <div className={`h-fit rounded-xl p-3 ${iconBg}`}>
+          <Icon icon={icon} className={`${iconColor} h-5 w-5`} />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 function ProjectOverviewCard({ projects }: { projects: Project[] }) {
   return (
-    <div className="rounded-md border border-gray-200 bg-white">
-      <div className="flex items-center justify-between border-b border-gray-100 p-4">
-        <h2 className="font-semibold text-gray-800">Ringkasan Proyek</h2>
+    <Card>
+      <CardHeader className="border-border flex flex-row items-center justify-between border-b pb-4">
+        <CardTitle className="text-base font-semibold">
+          Ringkasan Proyek
+        </CardTitle>
         <Link
           to="/projects"
-          className="group flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 md:text-sm"
+          className="group text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs md:text-sm"
         >
           Lihat Semua{" "}
           <Icon
@@ -65,20 +70,20 @@ function ProjectOverviewCard({ projects }: { projects: Project[] }) {
             className="aspect-square h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5"
           />
         </Link>
-      </div>
+      </CardHeader>
 
-      <div className="flex flex-col">
+      <CardContent className="flex flex-col p-0">
         {projects.map((project) => (
           <Link
             to="/projects/$projectId"
             params={{ projectId: project.id }}
             key={project.id}
-            className="border-b border-gray-100 p-5 transition-colors last:border-0 hover:bg-gray-50"
+            className="border-border hover:bg-muted/50 border-b p-5 transition-colors last:border-0"
           >
             <div className="mb-3 flex items-center justify-between gap-2">
               <div>
                 <h3 className="font-semibold">{project.name}</h3>
-                <p className="mt-1 max-w-[20ch] truncate text-xs text-gray-500 md:max-w-none md:overflow-visible md:whitespace-normal">
+                <p className="text-muted-foreground mt-1 max-w-[20ch] truncate text-xs md:max-w-none md:overflow-visible md:whitespace-normal">
                   {project.description || "Belum ada deskripsi."}
                 </p>
               </div>
@@ -88,7 +93,7 @@ function ProjectOverviewCard({ projects }: { projects: Project[] }) {
               </Badge>
             </div>
 
-            <div className="mb-4 flex items-center gap-4 text-xs text-gray-500">
+            <div className="text-muted-foreground mb-4 flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1.5">
                 <Icon icon="lucide:users" className="h-4 w-4" />{" "}
                 {project.project_members?.[0]?.count || 0} anggota
@@ -105,44 +110,46 @@ function ProjectOverviewCard({ projects }: { projects: Project[] }) {
             </div>
 
             <div className="w-full">
-              <div className="mb-1.5 flex justify-between text-xs text-gray-500">
+              <div className="text-muted-foreground mb-1.5 flex justify-between text-xs">
                 <span>Progres</span>
                 <span>{project.progress}%</span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+              <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                 <div
-                  className="h-1.5 rounded-full bg-emerald-500"
+                  className="h-1.5 rounded-full bg-primary"
                   style={{ width: `${project.progress}%` }}
-                ></div>
+                />
               </div>
             </div>
           </Link>
         ))}
         {projects.length === 0 && (
-          <div className="p-8 text-center text-sm text-gray-500">
+          <div className="text-muted-foreground p-8 text-center text-sm">
             Belum ada proyek.
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
 function RecentActivityCard({ tasks }: { tasks: RecentTask[] }) {
   return (
-    <div className="rounded-md border border-gray-200 bg-white">
-      <div className="border-b border-gray-100 p-4">
-        <h2 className="font-semibold text-gray-800">Aktifitas Terbaru</h2>
-      </div>
-      <div className="flex flex-col">
+    <Card>
+      <CardHeader className="border-border border-b pb-4">
+        <CardTitle className="text-base font-semibold">
+          Aktifitas Terbaru
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col p-0">
         {tasks.map((task) => (
           <div
             key={task.id}
-            className="flex items-start justify-between border-b border-gray-100 p-5 transition-colors last:border-0 hover:bg-gray-50"
+            className="border-border hover:bg-muted/50 flex items-start justify-between border-b p-5 transition-colors last:border-0"
           >
             <div className="flex gap-4">
               <div
-                className={`h-fit rounded-lg p-2.5 ${task.priority === "high" ? "bg-red-50 text-red-500" : task.priority === "low" ? "bg-emerald-50 text-emerald-500" : "bg-orange-50 text-orange-400"}`}
+                className={`h-fit rounded-lg p-2.5 ${task.priority === "high" ? "bg-red-50 text-red-500" : task.priority === "low" ? "bg-emerald-500/20 text-emerald-400" : "bg-orange-50 text-orange-400"}`}
               >
                 <Icon
                   icon={
@@ -155,14 +162,14 @@ function RecentActivityCard({ tasks }: { tasks: RecentTask[] }) {
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-gray-900 md:text-base">
+                <h3 className="text-foreground text-sm font-medium md:text-base">
                   {task.title}
                 </h3>
 
-                <div className="mt-2 flex flex-col gap-2 text-xs text-gray-500">
+                <div className="text-muted-foreground mt-2 flex flex-col gap-2 text-xs">
                   {task.profiles && (
-                    <span className="flex w-fit items-center gap-1.5 rounded-full bg-gray-100 px-2 py-1">
-                      <div className="flex h-4 w-4 items-center justify-center overflow-hidden rounded-full bg-gray-300 text-[10px] font-bold text-white">
+                    <span className="bg-muted flex w-fit items-center gap-1.5 rounded-full px-2 py-1">
+                      <div className="bg-muted-foreground/20 text-foreground flex h-4 w-4 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold">
                         {task.profiles.avatar_url ? (
                           <img
                             src={task.profiles.avatar_url}
@@ -202,12 +209,12 @@ function RecentActivityCard({ tasks }: { tasks: RecentTask[] }) {
           </div>
         ))}
         {tasks.length === 0 && (
-          <div className="p-8 text-center text-sm text-gray-500">
+          <div className="text-muted-foreground p-8 text-center text-sm">
             No recent activity.
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -221,8 +228,8 @@ function TaskListCard({
   emptyText = "Tidak ada tugas",
 }: TaskListCardProps) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-md border border-gray-200 bg-white">
-      <div className="flex items-center justify-between border-b border-gray-100 p-4">
+    <Card className="flex flex-col overflow-hidden">
+      <CardHeader className="border-border flex flex-row items-center justify-between border-b pb-4">
         <div className="flex items-center gap-2 font-semibold">
           <Icon icon={icon} className={`h-4 w-4 ${badgeColor}`} />
           {title}
@@ -233,30 +240,30 @@ function TaskListCard({
         >
           {count}
         </span>
-      </div>
+      </CardHeader>
 
-      <div className="flex flex-col gap-3 p-4">
+      <CardContent className="flex flex-col gap-3 p-4">
         {tasks.length === 0 ? (
-          <div className="flex items-center justify-center py-6 text-center text-sm text-gray-400">
+          <div className="text-muted-foreground flex items-center justify-center py-6 text-center text-sm">
             {emptyText}
           </div>
         ) : (
           tasks.map((task: Task) => (
             <div
               key={task.task_id}
-              className="rounded-lg border border-gray-100 bg-gray-50/80 p-3 transition-colors hover:border-gray-300"
+              className="border-border bg-muted/30 hover:border-border/80 rounded-lg border p-3 transition-colors"
             >
-              <h3 className="mb-1 text-sm font-medium text-gray-800">
+              <h3 className="text-foreground mb-1 text-sm font-medium">
                 {task.title}
               </h3>
-              <p className="Capitalize text-xs text-gray-500">
+              <p className="text-muted-foreground text-xs capitalize">
                 Tugas • Prioritas {PRIORITY[task.priority]}
               </p>
             </div>
           ))
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -370,8 +377,8 @@ export default function Dashboard() {
             num: projectStats?.completed_projects ?? 0,
             desc: `dari ${projectStats?.total_projects ?? 0} proyek`,
             icon: "lucide:check-circle",
-            iconBg: "bg-emerald-100",
-            iconColor: "text-emerald-500",
+            iconBg: "bg-emerald-500/20",
+            iconColor: "text-emerald-400",
           },
           {
             title: "Tugas",
@@ -407,27 +414,34 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold">
             Selamat Datang, {auth.profile?.username ?? "Pengguna"}!
           </h1>
-          <p>Ini ringkasan aktivitas proyekmu</p>
+          <p className="text-muted-foreground">
+            Ini ringkasan aktivitas proyekmu
+          </p>
         </div>
 
-        <button
+        <Button
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600 md:w-fit"
+          className="w-full md:w-fit"
         >
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-            <Icon icon="ic:round-plus" className="h-4 w-4" />
-          </span>
+          <Icon icon="ic:round-plus" className="h-4 w-4" />
           Proyek Baru
-        </button>
+        </Button>
       </div>
 
+      {/* Metadata Cards */}
       <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {loading
-          ? Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-28 animate-pulse rounded-md bg-gray-100"
-              />
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="flex justify-between p-4">
+                  <div className="flex flex-col gap-2 py-1">
+                    <div className="bg-muted h-4 w-24 animate-pulse rounded" />
+                    <div className="bg-muted my-1 h-8 w-12 animate-pulse rounded" />
+                    <div className="bg-muted h-3 w-32 animate-pulse rounded" />
+                  </div>
+                  <div className="bg-muted h-[52px] w-[52px] animate-pulse rounded-xl" />
+                </CardContent>
+              </Card>
             ))
           : metadata.map((item) => <MetadataCard key={item.title} {...item} />)}
       </div>

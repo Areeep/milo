@@ -5,7 +5,15 @@ import { Link } from "@tanstack/react-router";
 import { useWorkspace } from "#/contexts/WorkspaceContext";
 import { supabase } from "#/lib/supabase";
 import { CreateProjectModal } from "../dashboard/CreateProjectModal";
-import Button from "#/components/ui/Button";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#/components/ui/select";
 import Badge from "#/components/ui/Badge";
 import { PROJECT_STATUS, PRIORITY } from "./constants/project";
 import type { ProjectStatus, ProjectPriority } from "./constants/project";
@@ -31,8 +39,8 @@ export function Projects() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -66,32 +74,34 @@ export function Projects() {
         project.name.toLowerCase().includes(search.toLowerCase()) ||
         (project.description &&
           project.description.toLowerCase().includes(search.toLowerCase()));
-      const matchStatus = statusFilter ? project.status === statusFilter : true;
-      const matchPriority = priorityFilter
-        ? project.priority === priorityFilter
-        : true;
+      const matchStatus =
+        statusFilter && statusFilter !== "all"
+          ? project.status === statusFilter
+          : true;
+      const matchPriority =
+        priorityFilter && priorityFilter !== "all"
+          ? project.priority === priorityFilter
+          : true;
 
       return matchSearch && matchStatus && matchPriority;
     });
   }, [projects, search, statusFilter, priorityFilter]);
 
   return (
-    <div className="">
+    <div>
       {/* Header */}
       <div className="mb-6 flex flex-col justify-between gap-2 md:flex-row md:items-center">
         <div>
-          <h1 className="mb-1 text-2xl font-bold text-gray-900">
+          <h1 className="text-foreground mb-1 text-2xl font-bold">
             Daftar Proyek
           </h1>
-          <p className="text-sm text-gray-500">Kelola dan pantau proyek Anda</p>
+          <p className="text-muted-foreground text-sm">
+            Kelola dan pantau proyek Anda
+          </p>
         </div>
 
-        <Button
-          variant="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-          className=""
-        >
-          <Plus className="mr-2 h-4 w-4" />
+        <Button onClick={() => setIsCreateModalOpen(true)} className="md:w-fit">
+          <Plus className="h-4 w-4" />
           Proyek Baru
         </Button>
       </div>
@@ -99,63 +109,62 @@ export function Projects() {
       {/* Filters */}
       <div className="mb-8 flex flex-col-reverse gap-4 md:flex-row">
         <div className="relative md:w-80">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
             type="text"
             placeholder="Cari proyek..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 py-2 pr-4 pl-9 text-sm transition-all placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+            className="pl-9"
           />
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="relative cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2 pr-8 text-sm text-gray-600 transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
-        >
-          <option value="">Semua Status</option>
-          <option value="Aktif">Aktif</option>
-          <option value="Ditunda">Ditunda</option>
-          <option value="Selesai">Selesai</option>
-          <option value="Dibatalkan">Dibatalkan</option>
-        </select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="md:w-40">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Status</SelectItem>
+            <SelectItem value="active">Aktif</SelectItem>
+            <SelectItem value="on-hold">Ditunda</SelectItem>
+            <SelectItem value="completed">Selesai</SelectItem>
+            <SelectItem value="cancelled">Dibatalkan</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <select
-          value={priorityFilter}
-          onChange={(e) => setPriorityFilter(e.target.value)}
-          className="relative cursor-pointer appearance-none rounded-lg border border-gray-200 bg-white px-4 py-2 pr-8 text-sm text-gray-600 transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
-        >
-          <option value="">Semua Prioritas</option>
-          <option value="Tinggi">Tinggi</option>
-          <option value="Menengah">Menengah</option>
-          <option value="Rendah">Rendah</option>
-        </select>
+        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+          <SelectTrigger className="md:w-44">
+            <SelectValue placeholder="Semua Prioritas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Prioritas</SelectItem>
+            <SelectItem value="high">Tinggi</SelectItem>
+            <SelectItem value="medium">Menengah</SelectItem>
+            <SelectItem value="low">Rendah</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Projects Grid */}
       {loading ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-48 animate-pulse rounded-xl border border-gray-100 bg-white p-5"
-            >
-              <div className="mb-3 h-5 w-1/2 rounded bg-gray-200"></div>
-              <div className="mb-8 h-4 w-full rounded bg-gray-100"></div>
+          <phantom-ui loading={true} count={4} count-gap="24px">
+            <div className="border-border bg-card h-48 rounded-xl border p-5">
+              <div className="bg-muted mb-3 h-5 w-1/2 rounded" />
+              <div className="bg-muted mb-8 h-4 w-full rounded" />
               <div className="mb-6 flex items-center justify-between">
-                <div className="h-5 w-16 rounded bg-gray-200"></div>
-                <div className="h-4 w-24 rounded bg-gray-100"></div>
+                <div className="bg-muted h-5 w-16 rounded" />
+                <div className="bg-muted h-4 w-24 rounded" />
               </div>
               <div className="space-y-2">
-                <div className="h-3 w-full rounded bg-gray-100"></div>
-                <div className="h-1.5 w-full rounded-full bg-gray-200"></div>
+                <div className="bg-muted h-3 w-full rounded" />
+                <div className="bg-muted h-1.5 w-full rounded-full" />
               </div>
             </div>
-          ))}
+          </phantom-ui>
         </div>
       ) : filteredProjects.length === 0 ? (
-        <div className="py-20 text-center text-gray-500">
+        <div className="text-muted-foreground py-20 text-center">
           <p>No projects found.</p>
         </div>
       ) : (
@@ -164,10 +173,10 @@ export function Projects() {
             <Link
               to={"/projects/" + project.id + "/tasks"}
               key={project.id}
-              className="group flex h-full flex-col gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-xs transition-all"
+              className="group border-border bg-card hover:border-border/80 flex h-full flex-col gap-4 rounded-xl border p-5 shadow-xs transition-all hover:shadow-sm"
             >
               <div className="flex items-center justify-between">
-                <h3 className="mb-1 text-lg font-semibold text-gray-900">
+                <h3 className="text-foreground mb-1 text-lg font-semibold">
                   {project.name}
                 </h3>
 
@@ -182,29 +191,29 @@ export function Projects() {
                 </div>
               </div>
 
-              <p className="line-clamp-2 flex-1 text-xs text-gray-500 md:line-clamp-3 md:text-sm">
+              <p className="text-muted-foreground line-clamp-2 flex-1 text-xs md:line-clamp-3 md:text-sm">
                 {project.description || "Tidak ada deskripsi"}
               </p>
 
               <div className="space-y-2">
-                <div className="flex justify-between text-xs font-medium text-gray-500">
+                <div className="text-muted-foreground flex justify-between text-xs font-medium">
                   <span>Kemajuan Proyek</span>
                   <span>{project.progress || 0}%</span>
                 </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+                <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                   <div
-                    className="h-full rounded-full bg-emerald-600"
+                    className="h-full rounded-full bg-primary"
                     style={{ width: `${project.progress || 0}%` }}
-                  ></div>
+                  />
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-gray-50 pt-4">
-                <span className="text-xs font-medium text-gray-500">
+              <div className="border-border mt-4 flex items-center justify-between border-t pt-4">
+                <span className="text-muted-foreground text-xs font-medium">
                   {project.tasks[0]?.count || 0} Tugas
                 </span>
 
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-white">
                   Lihat Detail{" "}
                   <Icon
                     icon="formkit:arrowright"
@@ -223,7 +232,6 @@ export function Projects() {
         workspaceId={currentWorkspaceId || null}
         workspaceName={currentWorkspaceName}
         onProjectCreated={() => {
-          // Instead of a full page reload, we can just reload the data
           setRefreshTrigger((prev) => prev + 1);
         }}
       />

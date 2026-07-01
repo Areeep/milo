@@ -12,13 +12,23 @@ type WorkspaceContextType = {
   activeWorkspace: Workspace | null;
 };
 
-const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
+const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
+  undefined,
+);
 
-export function WorkspaceProvider({ children, workspaces }: { children: React.ReactNode, workspaces: Workspace[] }) {
-  const [activeWorkspaceId, setActiveWorkspaceIdState] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
+export function WorkspaceProvider({
+  children,
+  workspaces,
+}: {
+  children: React.ReactNode;
+  workspaces: Workspace[];
+}) {
+  const [activeWorkspaceId, setActiveWorkspaceIdState] = useState<
+    string | null
+  >(() => {
+    if (typeof window !== "undefined") {
       const saved = localStorage.getItem("milo_active_workspace");
-      if (saved && workspaces.some(w => w.id === saved)) {
+      if (saved && workspaces.some((w) => w.id === saved)) {
         return saved;
       }
     }
@@ -27,7 +37,7 @@ export function WorkspaceProvider({ children, workspaces }: { children: React.Re
 
   const setActiveWorkspaceId = (id: string | null) => {
     setActiveWorkspaceIdState(id);
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       if (id) {
         localStorage.setItem("milo_active_workspace", id);
       } else {
@@ -42,10 +52,13 @@ export function WorkspaceProvider({ children, workspaces }: { children: React.Re
     }
   }, [workspaces, activeWorkspaceId]);
 
-  const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId) || workspaces[0] || null;
+  const activeWorkspace =
+    workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0] || null;
 
   return (
-    <WorkspaceContext.Provider value={{ activeWorkspaceId, setActiveWorkspaceId, activeWorkspace }}>
+    <WorkspaceContext.Provider
+      value={{ activeWorkspaceId, setActiveWorkspaceId, activeWorkspace }}
+    >
       {children}
     </WorkspaceContext.Provider>
   );

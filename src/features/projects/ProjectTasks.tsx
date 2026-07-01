@@ -3,18 +3,39 @@ import { Icon } from "@iconify/react";
 import { supabase } from "#/lib/supabase";
 import { toast } from "react-hot-toast";
 import { TaskDetailModal } from "./TaskDetailModal";
+import { Button } from "#/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "#/components/ui/table";
+import { cn } from "#/lib/utils";
 
 export function ProjectTasks({ projectId }: { projectId: string }) {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Selection & Details
-  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
-  const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<any | null>(null);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<
+    any | null
+  >(null);
 
-  const [statusFilter, setStatusFilter] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState("");
-  const [assigneeFilter, setAssigneeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -38,8 +59,8 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
     if (projectId) fetchTasks();
 
     const handleRefresh = () => fetchTasks();
-    window.addEventListener('refresh-tasks', handleRefresh);
-    return () => window.removeEventListener('refresh-tasks', handleRefresh);
+    window.addEventListener("refresh-tasks", handleRefresh);
+    return () => window.removeEventListener("refresh-tasks", handleRefresh);
   }, [projectId]);
 
   const handleStatusChange = async (taskId: string, newStatus: string) => {
@@ -50,7 +71,9 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
         .eq("id", taskId);
 
       if (error) throw error;
-      setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+      setTasks(
+        tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
+      );
       toast.success("Status tugas diperbarui");
     } catch (err: any) {
       console.error("Error updating status:", err);
@@ -68,7 +91,9 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
   const handleBulkToggleDone = async () => {
     try {
       const ids = Array.from(selectedTaskIds);
-      const allDone = ids.every(id => tasks.find(t => t.id === id)?.status === "done");
+      const allDone = ids.every(
+        (id) => tasks.find((t) => t.id === id)?.status === "done",
+      );
       const newStatus = allDone ? "todo" : "done";
 
       const { error } = await supabase
@@ -77,11 +102,14 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
         .in("id", ids);
 
       if (error) throw error;
-      setTasks(tasks.map(t => selectedTaskIds.has(t.id) ? { ...t, status: newStatus } : t));
+      setTasks(
+        tasks.map((t) =>
+          selectedTaskIds.has(t.id) ? { ...t, status: newStatus } : t,
+        ),
+      );
       setSelectedTaskIds(new Set());
       toast.success("Status tugas diperbarui");
     } catch (err: any) {
-      // console.error("Error toggling tasks done status:", err);
       toast.error(err.message || "Gagal memperbarui status");
     }
   };
@@ -89,13 +117,10 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
   const handleBulkDelete = async () => {
     try {
       const ids = Array.from(selectedTaskIds);
-      const { error } = await supabase
-        .from("tasks")
-        .delete()
-        .in("id", ids);
+      const { error } = await supabase.from("tasks").delete().in("id", ids);
 
       if (error) throw error;
-      setTasks(tasks.filter(t => !selectedTaskIds.has(t.id)));
+      setTasks(tasks.filter((t) => !selectedTaskIds.has(t.id)));
       setSelectedTaskIds(new Set());
       toast.success("Tugas berhasil dihapus");
     } catch (err: any) {
@@ -105,200 +130,288 @@ export function ProjectTasks({ projectId }: { projectId: string }) {
   };
 
   const filteredTasks = tasks.filter((task) => {
-    const matchStatus = statusFilter ? task.status === statusFilter : true;
-    const matchPriority = priorityFilter ? task.priority === priorityFilter : true;
-    const matchAssignee = assigneeFilter ? task.assignee_id === assigneeFilter : true;
+    const matchStatus =
+      statusFilter && statusFilter !== "all"
+        ? task.status === statusFilter
+        : true;
+    const matchPriority =
+      priorityFilter && priorityFilter !== "all"
+        ? task.priority === priorityFilter
+        : true;
+    const matchAssignee =
+      assigneeFilter && assigneeFilter !== "all"
+        ? task.assignee_id === assigneeFilter
+        : true;
     return matchStatus && matchPriority && matchAssignee;
   });
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high": return "bg-rose-100 text-rose-600";
-      case "medium": return "bg-blue-100 text-blue-600";
-      case "low": return "bg-emerald-100 text-emerald-600";
-      default: return "bg-gray-100 text-gray-600";
+      case "high":
+        return "bg-rose-100 text-rose-600";
+      case "medium":
+        return "bg-blue-100 text-blue-600";
+      case "low":
+        return "bg-emerald-500/20 text-emerald-400";
+      default:
+        return "bg-muted text-muted-foreground";
     }
   };
 
-  const assignees = Array.from(new Set(tasks.map(t => t.assignee_id))).filter(Boolean);
+  const assignees = Array.from(new Set(tasks.map((t) => t.assignee_id))).filter(
+    Boolean,
+  );
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200">
+    <div className="border-border bg-card rounded-lg border">
       {/* Action Bar (When Tasks Selected) */}
       {selectedTaskIds.size > 0 && (
-        <div className="bg-blue-50/50 p-4 border-b border-gray-200 flex items-center justify-between">
-          <span className="text-sm font-medium text-blue-800">
-            {selectedTaskIds.size} task{selectedTaskIds.size > 1 ? "s" : ""} selected
+        <div className="border-border bg-muted/30 flex items-center justify-between border-b p-4">
+          <span className="text-foreground text-sm font-medium">
+            {selectedTaskIds.size} task
+            {selectedTaskIds.size > 1 ? "s" : ""} selected
           </span>
           <div className="flex gap-3">
             {(() => {
-              const allDone = Array.from(selectedTaskIds).every(id => tasks.find(t => t.id === id)?.status === "done");
+              const allDone = Array.from(selectedTaskIds).every(
+                (id) => tasks.find((t) => t.id === id)?.status === "done",
+              );
               return (
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={handleBulkToggleDone}
-                  className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
                 >
                   {allDone ? (
                     <>
-                      <Icon icon="lucide:x-circle" className="w-4 h-4 text-gray-500" />
+                      <Icon
+                        icon="lucide:x-circle"
+                        className="text-muted-foreground mr-2 h-4 w-4"
+                      />
                       Tandai Belum Selesai
                     </>
                   ) : (
                     <>
-                      <Icon icon="lucide:check-circle-2" className="w-4 h-4 text-emerald-500" />
+                      <Icon
+                        icon="lucide:check-circle-2"
+                        className="mr-2 h-4 w-4 text-white"
+                      />
                       Tandai Selesai
                     </>
                   )}
-                </button>
+                </Button>
               );
             })()}
-            <button
-              onClick={handleBulkDelete}
-              className="bg-white border border-gray-300 hover:bg-red-50 text-red-600 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2"
-            >
-              <Icon icon="lucide:trash-2" className="w-4 h-4" />
+            <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+              <Icon icon="lucide:trash-2" className="mr-2 h-4 w-4" />
               Hapus
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {/* Filters */}
-      <div className="p-4 border-b border-gray-200 flex gap-4">
-        <select 
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-        >
-          <option value="">All Statuses</option>
-          <option value="todo">To Do</option>
-          <option value="in_progress">In Progress</option>
-          <option value="review">Review</option>
-          <option value="done">Done</option>
-        </select>
+      <div className="border-border flex flex-wrap gap-3 border-b p-4">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="All Statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="todo">To Do</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="review">Review</SelectItem>
+            <SelectItem value="done">Done</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <select 
-          value={priorityFilter}
-          onChange={(e) => setPriorityFilter(e.target.value)}
-          className="border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-        >
-          <option value="">All Priorities</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-        </select>
+        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="All Priorities" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priorities</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <select 
-          value={assigneeFilter}
-          onChange={(e) => setAssigneeFilter(e.target.value)}
-          className="border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-        >
-          <option value="">All Assignees</option>
-          {assignees.map((id) => {
-            const user = tasks.find(t => t.assignee_id === id)?.assignee;
-            return <option key={id} value={id}>{user?.username || "Unknown"}</option>;
-          })}
-        </select>
+        <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="All Assignees" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Assignees</SelectItem>
+            {assignees.map((id) => {
+              const user = tasks.find((t) => t.assignee_id === id)?.assignee;
+              return (
+                <SelectItem key={id} value={id}>
+                  {user?.username || "Unknown"}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-gray-600">
-          <thead className="text-xs uppercase text-gray-500 font-semibold border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-4 w-8"></th>
-              <th className="px-6 py-4">Title</th>
-              <th className="px-6 py-4">Priority</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4">Assignee</th>
-              <th className="px-6 py-4">Due Date</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-8" />
+              <TableHead>Title</TableHead>
+              <TableHead>Priority</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Assignee</TableHead>
+              <TableHead>Due Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i} className="border-b border-gray-100 animate-pulse">
-                  <td className="px-6 py-4"><div className="w-4 h-4 rounded bg-gray-200"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-3/4"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-20"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
-                </tr>
-              ))
+              <phantom-ui loading={true} count={5} count-gap="0px">
+                <TableRow>
+                  <TableCell>
+                    <div className="bg-muted h-4 w-4 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="bg-muted h-4 w-3/4 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="bg-muted h-4 w-16 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="bg-muted h-4 w-20 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="bg-muted h-4 w-24 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="bg-muted h-4 w-16 rounded" />
+                  </TableCell>
+                </TableRow>
+              </phantom-ui>
             ) : filteredTasks.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-400">No tasks found.</td>
-              </tr>
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="text-muted-foreground px-6 py-8 text-center"
+                >
+                  No tasks found.
+                </TableCell>
+              </TableRow>
             ) : (
               filteredTasks.map((task) => {
                 const isDone = task.status === "done";
                 return (
-                  <tr 
-                    key={task.id} 
+                  <TableRow
+                    key={task.id}
                     onClick={() => setSelectedTaskForDetail(task)}
-                    className={`border-b border-gray-100 transition-colors cursor-pointer hover:bg-gray-50 ${isDone ? 'bg-gray-50 opacity-75' : ''}`}
+                    className={cn("cursor-pointer", isDone && "opacity-75")}
                   >
-                    <td className="px-6 py-4">
-                      <input 
+                    <TableCell>
+                      <input
                         type="checkbox"
                         checked={selectedTaskIds.has(task.id)}
                         onChange={() => handleToggleTask(task.id)}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        className="border-input text-primary h-4 w-4 cursor-pointer rounded"
                       />
-                    </td>
-                    <td className={`px-6 py-4 font-medium ${isDone ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{task.title}</td>
-                    <td className="px-6 py-4">
-                      <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-sm ${getPriorityColor(task.priority)}`}>
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "font-medium",
+                        isDone
+                          ? "text-muted-foreground line-through"
+                          : "text-foreground",
+                      )}
+                    >
+                      {task.title}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={cn(
+                          "rounded-sm px-2 py-1 text-[10px] font-bold tracking-wider uppercase",
+                          getPriorityColor(task.priority),
+                        )}
+                      >
                         {task.priority}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
+                    </TableCell>
+                    <TableCell>
                       <select
                         value={task.status}
-                        onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                        onChange={(e) =>
+                          handleStatusChange(task.id, e.target.value)
+                        }
                         onClick={(e) => e.stopPropagation()}
-                        className={`text-sm bg-transparent border border-transparent hover:border-gray-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer p-1 -ml-1 ${isDone ? 'text-gray-500' : 'text-gray-900'}`}
+                        className={cn(
+                          "hover:border-border focus:ring-ring focus:border-ring -ml-1 cursor-pointer rounded border border-transparent bg-transparent p-1 text-sm outline-none focus:ring-2",
+                          isDone ? "text-muted-foreground" : "text-foreground",
+                        )}
                       >
                         <option value="todo">To Do</option>
                         <option value="in_progress">In Progress</option>
                         <option value="review">Review</option>
                         <option value="done">Done</option>
                       </select>
-                    </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      {task.assignee?.avatar_url ? (
-                        <img src={task.assignee.avatar_url} alt="" className="w-6 h-6 rounded-full" />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center">
-                          <Icon icon="lucide:user" className="w-3 h-3 text-gray-400" />
-                        </div>
-                      )}
-                      <span>{task.assignee?.username || "Unassigned"}</span>
-                    </div>
-                  </td>
-                  <td className={`px-6 py-4 ${isDone ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {task.due_date ? new Date(task.due_date).toLocaleDateString("en-GB", { day: '2-digit', month: 'short' }) : "-"}
-                  </td>
-                </tr>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {task.assignee?.avatar_url ? (
+                          <img
+                            src={task.assignee.avatar_url}
+                            alt=""
+                            className="h-6 w-6 rounded-full"
+                          />
+                        ) : (
+                          <div className="bg-muted border-border flex h-6 w-6 items-center justify-center rounded-full border">
+                            <Icon
+                              icon="lucide:user"
+                              className="text-muted-foreground h-3 w-3"
+                            />
+                          </div>
+                        )}
+                        <span className="text-foreground text-sm">
+                          {task.assignee?.username || "Unassigned"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className={
+                        isDone
+                          ? "text-muted-foreground"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {task.due_date
+                        ? new Date(task.due_date).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                          })
+                        : "-"}
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
-      <TaskDetailModal 
+      <TaskDetailModal
         isOpen={!!selectedTaskForDetail}
         onClose={() => setSelectedTaskForDetail(null)}
         task={selectedTaskForDetail}
         onDelete={async (taskId) => {
           try {
-            const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+            const { error } = await supabase
+              .from("tasks")
+              .delete()
+              .eq("id", taskId);
             if (error) throw error;
-            setTasks(tasks.filter(t => t.id !== taskId));
+            setTasks(tasks.filter((t) => t.id !== taskId));
             setSelectedTaskForDetail(null);
           } catch (err) {
             console.error(err);

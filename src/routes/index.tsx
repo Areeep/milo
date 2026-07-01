@@ -58,7 +58,7 @@ function Home() {
             </Link>
           )}
           <Link
-            className="flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90"
             to={primaryLink}
           >
             {primaryLabel}
@@ -69,7 +69,7 @@ function Home() {
 
       <section className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-12 px-5 pt-8 pb-16 md:px-8 lg:grid-cols-[1fr_0.95fr] lg:items-center lg:pt-14 lg:pb-20">
         <div>
-          <p className="text-sm font-semibold text-emerald-700">
+          <p className="text-sm font-semibold text-primary">
             Project management untuk tim kecil
           </p>
           <h1 className="mt-4 max-w-3xl text-5xl font-bold tracking-normal text-slate-950 md:text-6xl">
@@ -82,14 +82,14 @@ function Home() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              className="flex items-center justify-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+              className="flex items-center justify-center gap-2 rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-primary/90"
               to={primaryLink}
             >
               {primaryLabel}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
             <Link
-              className="flex items-center justify-center rounded-md border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:border-emerald-600 hover:text-emerald-700"
+              className="flex items-center justify-center rounded-md border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 hover:border-primary hover:text-primary"
               to={user ? "/dashboard" : "/login"}
             >
               {user ? "Lihat ringkasan" : "Masuk ke akun"}
@@ -129,13 +129,13 @@ function Home() {
                   <p className="text-sm text-slate-500">Ringkasan workspace</p>
                 </div>
               </div>
-              <ShieldCheck className="h-6 w-6 text-emerald-600" aria-hidden />
+              <ShieldCheck className="h-6 w-6 text-primary" aria-hidden />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               {[
                 ["Total Proyek", "12", "bg-sky-50 text-sky-700"],
-                ["Selesai", "8", "bg-emerald-50 text-emerald-700"],
+                ["Selesai", "8", "bg-emerald-500/20 text-emerald-400"],
                 ["Tugas", "34", "bg-violet-50 text-violet-700"],
                 ["Terlambat", "3", "bg-amber-50 text-amber-700"],
               ].map(([label, value, tone]) => (
@@ -159,10 +159,10 @@ function Home() {
             <div className="mt-4 rounded-md border border-slate-200 p-4">
               <div className="flex items-center justify-between">
                 <p className="font-semibold">Sprint produk</p>
-                <span className="text-sm text-emerald-700">68%</span>
+                <span className="text-sm text-primary">68%</span>
               </div>
               <div className="mt-3 h-2 rounded-md bg-slate-100">
-                <div className="h-2 w-2/3 rounded-md bg-emerald-600" />
+                <div className="h-2 w-2/3 rounded-md bg-primary" />
               </div>
             </div>
           </div>
@@ -179,7 +179,7 @@ function Home() {
                 className="rounded-md border border-slate-200 bg-white p-5"
                 key={feature.title}
               >
-                <Icon className="h-6 w-6 text-emerald-700" aria-hidden />
+                <Icon className="h-6 w-6 text-primary" aria-hidden />
                 <h2 className="mt-4 text-lg font-bold">{feature.title}</h2>
                 <p className="mt-2 leading-6 text-slate-600">
                   {feature.description}
@@ -192,7 +192,7 @@ function Home() {
 
       <section className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-5 py-14 md:grid-cols-[0.8fr_1fr] md:px-8">
         <div>
-          <p className="text-sm font-semibold text-emerald-700">
+          <p className="text-sm font-semibold text-primary">
             Alur sederhana
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-normal">
@@ -205,12 +205,12 @@ function Home() {
               key={item}
               className="flex items-center gap-4 rounded-md border border-slate-200 p-4"
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-sm font-bold text-emerald-700">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/15 text-sm font-bold text-white">
                 {index + 1}
               </span>
               <span className="font-medium text-slate-800">{item}</span>
               <CheckCircle2
-                className="ml-auto h-5 w-5 text-emerald-600"
+                className="ml-auto h-5 w-5 text-primary"
                 aria-hidden
               />
             </div>
